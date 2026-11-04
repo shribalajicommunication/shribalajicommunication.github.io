@@ -7,6 +7,140 @@
 :root{--site-primary:#e87519;--site-secondary:#172033;--site-background:#fffaf5;--site-on-primary:#ffffff;--site-on-secondary:#ffffff;--site-on-background:#202638;--site-font-body:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;--site-font-heading:system-ui,-apple-system,"Noto Sans Devanagari",sans-serif;--site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1;--ink:#202638;--muted:#667085;--line:#eadfd5;--surface:#ffffff;--soft:#fff1e5;--green:#16834a}
 *{box-sizing:border-box}body{margin:0;font-family:var(--site-font-body);color:var(--ink);background:var(--site-background)}button,input,textarea,select{font:inherit}button{cursor:pointer}.root{min-height:100vh;background:light-dark(var(--site-background),#17191e);color:light-dark(var(--ink),#f4f4f5)}.top{background:var(--site-secondary);color:white;padding:9px 5%;font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 5%;background:var(--surface);border-bottom:1px solid var(--line);gap:20px}.brand{display:flex;align-items:center;gap:12px}.mark{width:48px;height:48px;border-radius:15px;background:var(--site-primary);display:grid;place-items:center;color:white;font-weight:900;font-size:22px}.brand b{display:block;font-size:19px}.brand small{color:var(--muted)}.navlinks{display:flex;gap:22px;align-items:center;flex-wrap:wrap}.navlinks a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:650}.btn{border:0;border-radius:12px;padding:12px 18px;background:var(--site-primary);color:white;font-weight:750;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn.dark{background:var(--site-secondary)}.btn.outline{background:transparent;color:var(--site-primary);border:1px solid var(--site-primary)}.hero{padding:72px 5% 64px;background:linear-gradient(120deg,#fff1e5 0%,#fffaf5 55%,#f7e6d6 100%);display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center}.eyebrow{display:inline-block;color:#a94c0a;background:#ffe0c4;border-radius:100px;padding:7px 13px;font-size:12px;font-weight:800;letter-spacing:.3px}.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.14;margin:18px 0 14px;letter-spacing:-1.2px}.hero h1 span{color:var(--site-primary)}.hero p{font-size:17px;line-height:1.8;color:#596273;max-width:620px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.hero-card{background:white;border:1px solid #f0ddcb;border-radius:24px;padding:26px;box-shadow:0 20px 50px #9b5a2415}.hero-card h3{margin:0 0 18px}.service-mini{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #f0e8e0}.service-mini:last-child{border:0}.ico{width:40px;height:40px;display:grid;place-items:center;background:var(--soft);border-radius:12px;font-size:20px}.service-mini b{display:block}.service-mini small{color:var(--muted)}.wrap{padding:62px 5%;max-width:1240px;margin:auto}.section-head{text-align:center;margin-bottom:32px}.section-head h2{font-size:clamp(25px,3vw,36px);margin:8px 0}.section-head p{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:23px;box-shadow:0 8px 24px #33200c08}.card .ico{margin-bottom:15px}.card h3{margin:0 0 8px}.card p{margin:0;color:var(--muted);line-height:1.65;font-size:14px}.updates{background:#fff5ec}.update-list{display:grid;gap:12px;max-width:850px;margin:auto}.update{background:white;border:1px solid var(--line);border-radius:14px;padding:17px 20px;display:flex;justify-content:space-between;gap:16px;align-items:center}.update small{color:var(--site-primary);font-weight:750}.update h3{font-size:16px;margin:5px 0}.contact{display:grid;grid-template-columns:1fr 1fr;gap:24px}.contactbox{background:var(--site-secondary);color:white;border-radius:20px;padding:28px}.contactbox p{color:#d4d8e1;line-height:1.7}.contactbox a{color:white}.footer{background:#111827;color:#d8dce5;padding:30px 5%;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:13px}.admin-launch{position:fixed;right:18px;bottom:18px;z-index:4;box-shadow:0 8px 25px #0003}.admin{display:none;position:fixed;inset:0;z-index:10;background:#111827ee;overflow:auto;padding:22px}.admin.open{display:block}.admin-shell{max-width:1000px;margin:20px auto;background:#fff;color:#202638;border-radius:20px;padding:24px}.admin-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.admin-note{background:#fff4df;border:1px solid #f3d39b;padding:13px;border-radius:12px;font-size:13px;line-height:1.55;margin:18px 0}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:13px;font-weight:700}.field input,.field textarea,.field select{border:1px solid #d7dce4;border-radius:10px;padding:11px;width:100%;background:white;color:#202638}.field textarea{min-height:90px;resize:vertical}.admin-items{margin-top:24px}.admin-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e6e8ed}.admin-item small{color:#697386}.danger{background:#b42318}.hidden{display:none!important}.admin-actions{display:flex;gap:8px;flex-wrap:wrap}.empty{color:#687385;padding:14px 0}@media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:48px}.grid{grid-template-columns:1fr 1fr}.nav{align-items:flex-start}.navlinks{gap:12px}.contact{grid-template-columns:1fr}.admin-grid{grid-template-columns:1fr}}@media(max-width:480px){.grid{grid-template-columns:1fr}.top{font-size:12px}.nav{flex-direction:column}.navlinks{font-size:13px}.update{align-items:flex-start;flex-direction:column}.hero h1{font-size:36px}}
 </style>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyAOzHP3bOvs_0OLLathBdlzZc1ZrBJWW_I',
+  authDomain: 'shri-balaji-communication.firebaseapp.com',
+  projectId: 'shri-balaji-communication',
+  storageBucket: 'shri-balaji-communication.firebasestorage.app',
+  messagingSenderId: '248414940916',
+  appId: '1:248414940916:web:bb273d296281c211ee78a1'
+};
+const ADMIN_UID = 'NZAAy9G9QCfHlwsuVhYTqkUwil62';
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const updatesRef = collection(db, 'updates');
+const admin = document.getElementById('admin');
+const shell = admin.querySelector('.admin-shell');
+let items = [];
+let editingId = null;
+
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+shell.innerHTML = `
+  <div class="admin-head"><div><h2 style="margin:0">वेबसाइट Admin Panel</h2><small>Firebase Live Updates</small></div><button class="btn dark" id="closeFirebaseAdmin" type="button">बंद करें ✕</button></div>
+  <div id="firebaseLoginArea">
+    <div class="admin-note">केवल अधिकृत Admin ही लॉगिन कर सकता है। अपना पासवर्ड किसी के साथ साझा न करें।</div>
+    <form id="firebaseLoginForm">
+      <div class="field"><label for="firebaseEmail">Admin ईमेल</label><input id="firebaseEmail" type="email" autocomplete="username" required placeholder="Admin ईमेल"></div>
+      <div class="field"><label for="firebasePassword">पासवर्ड</label><input id="firebasePassword" type="password" autocomplete="current-password" required placeholder="Admin पासवर्ड"></div>
+      <button class="btn" type="submit" id="firebaseLoginButton">लॉगिन करें</button><p id="firebaseLoginMessage" role="status"></p>
+    </form>
+  </div>
+  <div id="firebaseAdminArea" class="hidden">
+    <div class="admin-actions" style="justify-content:space-between;align-items:center"><span id="firebaseAdminIdentity"></span><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div>
+    <form id="firebaseUpdateForm">
+      <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">तारीख</label><input id="firebaseDate" type="date"></div></div>
+      <div class="field"><label for="firebaseTitle">शीर्षक</label><input id="firebaseTitle" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div>
+      <div class="field"><label for="firebaseDescription">विवरण</label><textarea id="firebaseDescription" placeholder="मुख्य जानकारी, अंतिम तारीख आदि"></textarea></div>
+      <div class="admin-actions"><button class="btn" type="submit" id="firebaseSave">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="firebaseCancelEdit">एडिट रद्द करें</button></div>
+    </form>
+    <div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="firebaseAdminItems"></div></div>
+  </div>`;
+
+const el = id => document.getElementById(id);
+function resetFirebaseForm() {
+  editingId = null;
+  el('firebaseUpdateForm').reset();
+  el('firebaseSave').textContent = 'अपडेट प्रकाशित करें';
+  el('firebaseCancelEdit').classList.add('hidden');
+}
+function renderPublicUpdates() {
+  const sorted = [...items].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+  document.getElementById('publicUpdates').innerHTML = sorted.length ? sorted.map(x => `<article class="update"><div><small>${escapeHtml(x.category || 'सूचना')} · ${escapeHtml(x.date || '')}</small><h3>${escapeHtml(x.title || '')}</h3><div style="color:#667085;font-size:14px">${escapeHtml(x.description || '')}</div></div></article>`).join('') : '<p class="empty">अभी कोई अपडेट उपलब्ध नहीं है।</p>';
+  if (auth.currentUser?.uid === ADMIN_UID) {
+    el('firebaseAdminItems').innerHTML = sorted.length ? sorted.map(x => `<div class="admin-item"><div><b>${escapeHtml(x.title || '')}</b><br><small>${escapeHtml(x.category || '')} · ${escapeHtml(x.date || '')}</small></div><div class="admin-actions"><button class="btn outline" type="button" data-firebase-edit="${escapeHtml(x.id)}">एडिट</button><button class="btn danger" type="button" data-firebase-delete="${escapeHtml(x.id)}">डिलीट</button></div></div>`).join('') : '<p class="empty">अभी कोई अपडेट नहीं है।</p>';
+  }
+}
+
+onSnapshot(updatesRef, snapshot => {
+  items = snapshot.docs.map(d => ({id:d.id, ...d.data()}));
+  renderPublicUpdates();
+}, error => {
+  console.error('Firestore updates error:', error);
+  document.getElementById('publicUpdates').innerHTML = '<p class="empty">अपडेट अभी लोड नहीं हो सके। कृपया बाद में पुनः प्रयास करें।</p>';
+});
+
+window.openAdmin = () => admin.classList.add('open');
+window.closeAdmin = () => admin.classList.remove('open');
+el('closeFirebaseAdmin').addEventListener('click', window.closeAdmin);
+el('firebaseLoginForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  el('firebaseLoginMessage').textContent = 'लॉगिन हो रहा है…';
+  el('firebaseLoginButton').disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, el('firebaseEmail').value.trim(), el('firebasePassword').value);
+    el('firebaseLoginMessage').textContent = '';
+  } catch (error) {
+    console.error('Firebase login error:', error);
+    el('firebaseLoginMessage').textContent = 'लॉगिन नहीं हुआ। ईमेल और पासवर्ड जाँचें।';
+  } finally {
+    el('firebaseLoginButton').disabled = false;
+  }
+});
+onAuthStateChanged(auth, user => {
+  const isAdmin = user?.uid === ADMIN_UID;
+  el('firebaseLoginArea').classList.toggle('hidden', isAdmin);
+  el('firebaseAdminArea').classList.toggle('hidden', !isAdmin);
+  if (isAdmin) {
+    el('firebaseAdminIdentity').textContent = `लॉगिन: ${user.email || 'Admin'}`;
+    renderPublicUpdates();
+  } else if (user) {
+    el('firebaseLoginMessage').textContent = 'इस अकाउंट को Admin अनुमति नहीं है।';
+    signOut(auth);
+  }
+});
+el('firebaseLogout').addEventListener('click', async () => { resetFirebaseForm(); await signOut(auth); });
+el('firebaseCancelEdit').addEventListener('click', resetFirebaseForm);
+el('firebaseUpdateForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (auth.currentUser?.uid !== ADMIN_UID) return;
+  const data = {category:el('firebaseCategory').value, date:el('firebaseDate').value, title:el('firebaseTitle').value.trim(), description:el('firebaseDescription').value.trim()};
+  try {
+    el('firebaseSave').disabled = true;
+    if (editingId) await updateDoc(doc(db, 'updates', editingId), data);
+    else await addDoc(updatesRef, data);
+    resetFirebaseForm();
+  } catch (error) {
+    console.error('Firestore save error:', error);
+    alert('अपडेट सेव नहीं हुआ। इंटरनेट और Firestore Rules जाँचें।');
+  } finally { el('firebaseSave').disabled = false; }
+});
+el('firebaseAdminItems').addEventListener('click', async event => {
+  const editId = event.target.dataset.firebaseEdit;
+  const deleteId = event.target.dataset.firebaseDelete;
+  if (editId) {
+    const item = items.find(x => x.id === editId);
+    if (!item) return;
+    editingId = editId;
+    el('firebaseCategory').value = item.category || 'दुकान की सूचना';
+    el('firebaseDate').value = item.date || '';
+    el('firebaseTitle').value = item.title || '';
+    el('firebaseDescription').value = item.description || '';
+    el('firebaseSave').textContent = 'बदलाव सेव करें';
+    el('firebaseCancelEdit').classList.remove('hidden');
+    el('firebaseTitle').focus();
+  }
+  if (deleteId && confirm('क्या आप यह अपडेट हटाना चाहते हैं?')) {
+    try { await deleteDoc(doc(db, 'updates', deleteId)); }
+    catch (error) { console.error('Firestore delete error:', error); alert('अपडेट हटाया नहीं जा सका।'); }
+  }
+});
+</script>
 </head>
 <body><main class="root">
 <div class="top"><span>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</span><span>📞 7089748108 · सोमवार–शनिवार</span></div>
@@ -18,16 +152,5 @@
 <footer class="footer"><span>© 2026 श्री बालाजी कम्युनिकेशन · Since 2017</span><span>ईसागढ़, मध्य प्रदेश · 7089748108</span></footer>
 <button class="btn dark admin-launch" onclick="openAdmin()">⚙ Admin Panel</button>
 </main>
-<div class="admin" id="admin"><div class="admin-shell"><div class="admin-head"><div><h2 style="margin:0">वेबसाइट Admin Panel</h2><small>भर्ती, पोस्टर और सरकारी योजनाओं के अपडेट</small></div><button class="btn dark" onclick="closeAdmin()">बंद करें ✕</button></div><div class="admin-note"><b>डेमो प्रोटोटाइप:</b> यहाँ जो अपडेट जोड़ेंगे वे इसी ब्राउज़र में लोकल रूप से सेव होंगे। यह अभी सुरक्षित ऑनलाइन लॉगिन या लाइव वेबसाइट डेटाबेस से जुड़ा नहीं है। सार्वजनिक वेबसाइट पर सभी डिवाइसों में बदलाव दिखाने के लिए Firebase/अन्य बैकएंड और सुरक्षित एडमिन लॉगिन जोड़ना होगा। संवेदनशील जानकारी यहाँ न डालें।</div><form id="updateForm"><div class="admin-grid"><div class="field"><label for="category">अपडेट का प्रकार</label><select id="category"><option>भर्ती / परीक्षा</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="date">तारीख</label><input id="date" type="date"></div></div><div class="field"><label for="title">शीर्षक</label><input id="title" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div><div class="field"><label for="description">विवरण</label><textarea id="description" placeholder="मुख्य जानकारी, अंतिम तारीख आदि"></textarea></div><div class="admin-actions"><button class="btn" type="submit" id="saveBtn">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="cancelEdit" onclick="resetForm()">एडिट रद्द करें</button></div></form><div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="adminUpdates"></div></div></div></div>
-<script>
-const KEY='sbc_demo_updates_v1';let editing=null;const initial=[{id:1,category:'दुकान की सूचना',date:'2026-11-05',title:'श्री बालाजी कम्युनिकेशन की वेबसाइट पर आपका स्वागत है',description:'भर्ती, सरकारी योजनाओं और ऑनलाइन सेवाओं की नई जानकारी यहाँ प्रकाशित की जाएगी।'}];
-function getItems(){try{return JSON.parse(localStorage.getItem(KEY))||initial}catch(e){return initial}}
-function saveItems(items){localStorage.setItem(KEY,JSON.stringify(items));render()}
-function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function render(){const items=getItems().sort((a,b)=>(b.date||'').localeCompare(a.date||''));document.getElementById('publicUpdates').innerHTML=items.length?items.map(x=>`<article class="update"><div><small>${esc(x.category)} · ${esc(x.date||'')}</small><h3>${esc(x.title)}</h3><div style="color:#667085;font-size:14px">${esc(x.description)}</div></div></article>`).join(''):'<p class="empty">अभी कोई अपडेट उपलब्ध नहीं है।</p>';document.getElementById('adminUpdates').innerHTML=items.length?items.map(x=>`<div class="admin-item"><div><b>${esc(x.title)}</b><br><small>${esc(x.category)} · ${esc(x.date||'')}</small></div><div class="admin-actions"><button class="btn outline" onclick="editItem(${Number(x.id)})">एडिट</button><button class="btn danger" onclick="deleteItem(${Number(x.id)})">डिलीट</button></div></div>`).join(''):'<p class="empty">अभी कोई अपडेट नहीं है।</p>'}
-function openAdmin(){document.getElementById('admin').classList.add('open');render()}function closeAdmin(){document.getElementById('admin').classList.remove('open')}
-function resetForm(){editing=null;document.getElementById('updateForm').reset();document.getElementById('saveBtn').textContent='अपडेट प्रकाशित करें';document.getElementById('cancelEdit').classList.add('hidden')}
-function editItem(id){const x=getItems().find(a=>a.id===id);if(!x)return;editing=id;document.getElementById('category').value=x.category;document.getElementById('date').value=x.date;document.getElementById('title').value=x.title;document.getElementById('description').value=x.description;document.getElementById('saveBtn').textContent='बदलाव सेव करें';document.getElementById('cancelEdit').classList.remove('hidden');document.getElementById('title').focus()}
-function deleteItem(id){if(confirm('क्या आप यह अपडेट हटाना चाहते हैं?'))saveItems(getItems().filter(x=>x.id!==id))}
-document.getElementById('updateForm').addEventListener('submit',e=>{e.preventDefault();const items=getItems();const item={id:editing||Date.now(),category:document.getElementById('category').value,date:document.getElementById('date').value,title:document.getElementById('title').value.trim(),description:document.getElementById('description').value.trim()};if(editing){const i=items.findIndex(x=>x.id===editing);if(i>=0)items[i]=item}else items.push(item);saveItems(items);resetForm()});render();
-</script></body></html>
+<div class="admin" id="admin"><div class="admin-shell"></div></div>
+</body></html>
