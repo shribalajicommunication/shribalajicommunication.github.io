@@ -94,6 +94,7 @@ onSnapshot(updatesRef, snapshot => {
   document.getElementById('publicUpdates').innerHTML = '<p class="empty">अपडेट अभी लोड नहीं हो सके। कृपया बाद में पुनः प्रयास करें।</p>';
 });
 
+el('officialLoginButton').addEventListener('click', () => admin.classList.add('open'));
 window.openAdmin = () => admin.classList.add('open');
 window.closeAdmin = () => admin.classList.remove('open');
 el('closeFirebaseAdmin').addEventListener('click', window.closeAdmin);
@@ -183,7 +184,7 @@ el('updateCategoryFilter').addEventListener('change', renderPublicUpdates);
 <section class="updates" id="updates"><div class="wrap"><div class="section-head"><span class="eyebrow">LATEST INFORMATION</span><h2>लेटेस्ट अपडेट एवं सूचनाएँ</h2><p>नई भर्ती, सरकारी योजनाओं और परीक्षा संबंधी जानकारी</p></div><div class="update-tools"><input id="updateSearch" type="search" placeholder="🔍 अपडेट खोजें..." aria-label="अपडेट खोजें"><select id="updateCategoryFilter" aria-label="श्रेणी चुनें"><option value="">सभी श्रेणियाँ</option><option>भर्ती / परीक्षा</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><p id="updateCount" style="text-align:center;color:#667085;font-size:13px;margin:-7px 0 16px"></p><div class="update-list" id="publicUpdates"></div></div></section>
 <section class="wrap" id="contact"><div class="section-head"><span class="eyebrow">GET IN TOUCH</span><h2>हमसे संपर्क करें</h2></div><div class="contact"><div class="contactbox"><h2>श्रीबालाजी कम्युनिकेशन</h2><p>आपकी डिजिटल सेवाओं के लिए आपका स्थानीय सेवा केंद्र साथी। वर्ष 2017 से विश्‍वसनीय और पारदर्शी सेवाएँ प्रदान करने का अनुभव।</p><p>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</p><p>📞 <a href="tel:7089748108">7089748108</a></p><a class="btn" href="https://wa.me/917089748108" target="_blank" rel="noopener">WhatsApp करें</a></div><div class="card shop-map-card"><div style="width:100%;height:320px;border-radius:14px;overflow:hidden;border:1px solid #eadfd5"><iframe title="श्रीबालाजी कम्युनिकेशन दुकान का Google Map" src="https://www.google.com/maps?q=Shri%20Balaji%20Communication%2C%20Kadwaya%20Road%2C%20Isagarh%2C%20Madhya%20Pradesh&output=embed" width="100%" height="100%" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div></div></section>
 <footer class="footer"><span>© 2026 श्रीबालाजी कम्युनिकेशन · Since 2017</span><span>ईसागढ़, मध्य प्रदेश · 7089748108</span></footer>
-<button class="btn dark admin-launch" onclick="openAdmin()">⚙ Official Login</button>
+<button class="btn dark admin-launch" id="officialLoginButton" type="button">⚙ Official Login</button>
 </main>
 <div class="admin" id="admin"><div class="admin-shell"></div></div>
 </body></html>
