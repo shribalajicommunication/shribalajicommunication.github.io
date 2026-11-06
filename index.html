@@ -19,11 +19,12 @@
 .pin-control{display:flex;align-items:center;gap:8px;margin:12px 0;font-weight:700;font-size:14px}
 .update.pinned{border:1px solid #e7bd59;box-shadow:0 5px 18px #b9851b18}
 
+.job-deadline{margin:10px 0;color:#a33b18;font-size:14px}.request-form{max-width:760px;margin:0 auto}.request-form .field{margin:8px 0}.request-form button{min-width:180px}.request-item{align-items:flex-start}@media(max-width:760px){.request-item{flex-direction:column}}
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js';
-import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAOzHP3bOvs_0OLLathBdlzZc1ZrBJWW_I',
@@ -40,6 +41,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const updatesRef = collection(db, 'updates');
+const requestsRef = collection(db, 'serviceRequests');
+let requestItems = [];
+let stopRequestsListener = null;
 const admin = document.getElementById('admin');
 const shell = admin.querySelector('.admin-shell');
 let items = [];
@@ -59,14 +63,16 @@ shell.innerHTML = `
   <div id="firebaseAdminArea" class="hidden">
     <div class="admin-actions" style="justify-content:space-between;align-items:center"><span id="firebaseAdminIdentity"></span><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div>
     <form id="firebaseUpdateForm">
-      <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">तारीख</label><input id="firebaseDate" type="date"></div></div>
+      <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">अपडेट की तारीख</label><input id="firebaseDate" type="date"></div></div>
       <div class="field"><label for="firebaseTitle">शीर्षक</label><input id="firebaseTitle" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div>
-      <div class="field"><label for="firebaseDescription">विवरण</label><textarea id="firebaseDescription" placeholder="मुख्य जानकारी, अंतिम तारीख आदि"></textarea></div>
+      <div class="field"><label for="firebaseDescription">विवरण</label><textarea id="firebaseDescription" placeholder="मुख्य जानकारी, पात्रता, आवेदन प्रक्रिया आदि"></textarea></div>
+      <div class="admin-grid"><div class="field"><label for="firebaseLastDate">आवेदन की अंतिम तारीख (वैकल्पिक)</label><input id="firebaseLastDate" type="date"></div><div class="field"><label for="firebaseApplyUrl">आधिकारिक आवेदन / जानकारी लिंक (वैकल्पिक)</label><input id="firebaseApplyUrl" type="url" placeholder="https://..."></div></div>
       <div class="field"><label for="firebaseImage">पोस्टर / फोटो (JPG, PNG या WEBP; अधिकतम 5 MB)</label><input id="firebaseImage" type="file" accept="image/jpeg,image/png,image/webp"><small id="firebaseImageStatus">फोटो लगाना वैकल्पिक है। एडिट करते समय नई फोटो न चुनें तो पुरानी फोटो बनी रहेगी।</small></div>
       <label class="pin-control"><input id="firebasePinned" type="checkbox"> 📌 इस अपडेट को सबसे ऊपर Pin करें</label>
       <div class="admin-actions"><button class="btn" type="submit" id="firebaseSave">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="firebaseCancelEdit">एडिट रद्द करें</button></div>
     </form>
     <div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="firebaseAdminItems"></div></div>
+    <div class="admin-items"><h3>Request Online – ग्राहकों के अनुरोध</h3><p class="empty">ग्राहकों के अनुरोध यहाँ दिखाई देंगे।</p><div id="firebaseRequestItems"></div></div>
   </div>`;
 
 const el = id => document.getElementById(id);
@@ -75,6 +81,8 @@ function resetFirebaseForm() {
   el('firebaseUpdateForm').reset();
   el('firebaseImageStatus').textContent = 'फोटो लगाना वैकल्पिक है।';
   el('firebasePinned').checked = false;
+  el('firebaseLastDate').value = '';
+  el('firebaseApplyUrl').value = '';
   el('firebaseSave').textContent = 'अपडेट प्रकाशित करें';
   el('firebaseCancelEdit').classList.add('hidden');
 }
@@ -103,12 +111,51 @@ function renderPublicUpdates() {
   document.getElementById('updateResultCount').textContent = `${filtered.length} अपडेट मिले`;
   document.getElementById('publicUpdates').innerHTML = filtered.length ? filtered.map(x => {
     const shareText = encodeURIComponent(`📢 ${x.title || 'महत्वपूर्ण सूचना'}\n\n${x.description || ''}\n\nश्रीबालाजी कम्युनिकेशन, ईसागढ़\n📞 7089748108\n${location.href.split('#')[0]}`);
-    return `<article class="update ${x.pinned ? 'pinned' : ''}"><div style="width:100%"><small>${escapeHtml(x.category || 'सूचना')} · ${escapeHtml(x.date || '')}${x.pinned ? '<span class="pin-label">📌 PINNED</span>' : ''}</small><h3>${escapeHtml(x.title || '')}</h3><div style="color:#667085;font-size:14px">${escapeHtml(x.description || '')}</div>${x.imageUrl ? `<img src="${escapeHtml(x.imageUrl)}" alt="${escapeHtml(x.title || 'अपडेट पोस्टर')}" loading="lazy" style="display:block;max-width:100%;max-height:420px;object-fit:contain;margin-top:12px;border-radius:10px">` : ''}<div class="update-meta"><a class="whatsapp-share" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" aria-label="WhatsApp Share">☘ WhatsApp Share</a></div></div></article>`;
+    return `<article class="update ${x.pinned ? 'pinned' : ''}"><div style="width:100%"><small>${escapeHtml(x.category || 'सूचना')} · ${escapeHtml(x.date || '')}${x.pinned ? '<span class="pin-label">📌 PINNED</span>' : ''}</small><h3>${escapeHtml(x.title || '')}</h3><div style="color:#667085;font-size:14px">${escapeHtml(x.description || '')}</div>${x.lastDate ? `<p class="job-deadline"><b>आवेदन की अंतिम तारीख:</b> ${escapeHtml(x.lastDate)}</p>` : ''}${x.applyUrl ? `<p><a class="btn outline" href="${escapeHtml(x.applyUrl)}" target="_blank" rel="noopener noreferrer">आधिकारिक लिंक खोलें ↗</a></p>` : ''}${x.imageUrl ? `<img src="${escapeHtml(x.imageUrl)}" alt="${escapeHtml(x.title || 'अपडेट पोस्टर')}" loading="lazy" style="display:block;max-width:100%;max-height:420px;object-fit:contain;margin-top:12px;border-radius:10px">` : ''}<div class="update-meta"><a class="whatsapp-share" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" aria-label="WhatsApp Share">☘ WhatsApp Share</a></div></div></article>`;
   }).join('') : '<div class="update-empty">इस खोज या श्रेणी में कोई अपडेट नहीं मिला। दूसरा शब्द या सभी श्रेणियाँ चुनकर देखें।</div>';
   if (auth.currentUser?.uid === ADMIN_UID) {
     el('firebaseAdminItems').innerHTML = sorted.length ? sorted.map(x => `<div class="admin-item"><div><b>${escapeHtml(x.title || '')}</b><br><small>${escapeHtml(x.category || '')} · ${escapeHtml(x.date || '')}${x.pinned ? ' · 📌 PINNED' : ''}</small></div><div class="admin-actions"><button class="btn outline" type="button" data-firebase-pin="${escapeHtml(x.id)}">${x.pinned ? 'Unpin' : '📌 Pin'}</button><button class="btn outline" type="button" data-firebase-edit="${escapeHtml(x.id)}">एडिट</button><button class="btn danger" type="button" data-firebase-delete="${escapeHtml(x.id)}">डिलीट</button></div></div>`).join('') : '<p class="empty">अभी कोई अपडेट नहीं है।</p>';
   }
 }
+
+
+function renderAdminRequests() {
+  const host = el('firebaseRequestItems');
+  if (!host) return;
+  const sorted = [...requestItems].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  host.innerHTML = sorted.length ? sorted.map(r => `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions"><button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`).join('') : '<p class="empty">अभी कोई अनुरोध नहीं आया है।</p>';
+}
+
+el('onlineRequestForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const btn = el('requestSubmit');
+  const phone = el('requestPhone').value.replace(/\D/g, '');
+  if (!/^[6-9]\d{9}$/.test(phone)) { el('requestMessage').textContent = 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।'; return; }
+  btn.disabled = true;
+  el('requestMessage').textContent = 'आपका अनुरोध भेजा जा रहा है…';
+  try {
+    await addDoc(requestsRef, {name:el('requestName').value.trim(), phone, service:el('requestService').value, details:el('requestDetails').value.trim(), status:'नया अनुरोध', createdAt:serverTimestamp()});
+    el('onlineRequestForm').reset();
+    el('requestMessage').textContent = 'धन्यवाद! आपका अनुरोध मिल गया है। श्रीबालाजी कम्युनिकेशन आपसे संपर्क करेगा।';
+  } catch (error) {
+    console.error('Online request error:', error);
+    el('requestMessage').textContent = 'अनुरोध अभी जमा नहीं हुआ। कृपया WhatsApp पर संपर्क करें: 7089748108';
+  } finally { btn.disabled = false; }
+});
+
+el('firebaseRequestItems').addEventListener('click', async event => {
+  const doneId = event.target.dataset.requestDone;
+  const deleteId = event.target.dataset.requestDelete;
+  if (doneId) {
+    const current = requestItems.find(x => x.id === doneId);
+    if (current) try { await updateDoc(doc(db, 'serviceRequests', doneId), {status: current.status === 'पूरा हुआ' ? 'नया अनुरोध' : 'पूरा हुआ'}); }
+    catch (error) { console.error(error); alert('अनुरोध की स्थिति अपडेट नहीं हुई।'); }
+  }
+  if (deleteId && confirm('क्या आप यह ग्राहक अनुरोध हटाना चाहते हैं?')) {
+    try { await deleteDoc(doc(db, 'serviceRequests', deleteId)); }
+    catch (error) { console.error(error); alert('अनुरोध हटाया नहीं जा सका।'); }
+  }
+});
 
 document.getElementById('updateSearch').addEventListener('input', renderPublicUpdates);
 document.getElementById('updateCategoryFilter').addEventListener('change', renderPublicUpdates);
@@ -144,9 +191,14 @@ onAuthStateChanged(auth, user => {
   el('firebaseLoginArea').classList.toggle('hidden', isAdmin);
   el('firebaseAdminArea').classList.toggle('hidden', !isAdmin);
   if (isAdmin) {
+    if (!stopRequestsListener) stopRequestsListener = onSnapshot(requestsRef, snapshot => { requestItems = snapshot.docs.map(d => ({id:d.id, ...d.data()})); renderAdminRequests(); }, error => { console.error('Request list error:', error); el('firebaseRequestItems').textContent = 'अनुरोध लोड नहीं हो सके। Firestore Rules जाँचें।'; });
     el('firebaseAdminIdentity').textContent = `लॉगिन: ${user.email || 'Admin'}`;
     renderPublicUpdates();
-  } else if (user) {
+  } else {
+    if (stopRequestsListener) { stopRequestsListener(); stopRequestsListener = null; }
+    requestItems = [];
+  }
+  if (!isAdmin && user) {
     el('firebaseLoginMessage').textContent = 'इस अकाउंट को Admin अनुमति नहीं है।';
     signOut(auth);
   }
@@ -161,7 +213,7 @@ el('firebaseUpdateForm').addEventListener('submit', async event => {
     el('firebaseSave').disabled = true;
     if (selectedFile) el('firebaseImageStatus').textContent = 'फोटो अपलोड हो रही है…';
     const imageUrl = selectedFile ? await uploadPoster(selectedFile) : (editingId ? (items.find(x => x.id === editingId)?.imageUrl || '') : '');
-    const data = {category:el('firebaseCategory').value, date:el('firebaseDate').value, title:el('firebaseTitle').value.trim(), description:el('firebaseDescription').value.trim(), imageUrl, pinned:el('firebasePinned').checked};
+    const data = {category:el('firebaseCategory').value, date:el('firebaseDate').value, title:el('firebaseTitle').value.trim(), description:el('firebaseDescription').value.trim(), lastDate:el('firebaseLastDate').value, applyUrl:el('firebaseApplyUrl').value.trim(), imageUrl, pinned:el('firebasePinned').checked};
     if (editingId) await updateDoc(doc(db, 'updates', editingId), data);
     else await addDoc(updatesRef, data);
     resetFirebaseForm();
@@ -182,6 +234,8 @@ el('firebaseAdminItems').addEventListener('click', async event => {
     el('firebaseDate').value = item.date || '';
     el('firebaseTitle').value = item.title || '';
     el('firebaseDescription').value = item.description || '';
+    el('firebaseLastDate').value = item.lastDate || '';
+    el('firebaseApplyUrl').value = item.applyUrl || '';
     el('firebasePinned').checked = !!item.pinned;
     el('firebaseImageStatus').textContent = item.imageUrl ? 'इस अपडेट में पहले से फोटो लगी है। नई फोटो चुनने पर वह बदल जाएगी।' : 'इस अपडेट में अभी फोटो नहीं है।';
     el('firebaseSave').textContent = 'बदलाव सेव करें';
@@ -204,10 +258,19 @@ el('firebaseAdminItems').addEventListener('click', async event => {
 </head>
 <body><main class="root">
 <div class="top"><span>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</span><span>📞 7089748108 · सोमवार–शनिवार</span></div>
-<header class="nav"><div class="brand"><div class="mark">श्री</div><div><b>श्रीबालाजी कम्युनिकेशन</b><small>Digital Services · Since 2017</small></div></div><nav class="navlinks"><a href="#home">होम</a><a href="#services">हमारी सेवाएँ</a><a href="#updates">लेटेस्ट अपडेट</a><a href="#contact">संपर्क</a><a class="btn" href="https://wa.me/917089748108" target="_blank" rel="noopener">WhatsApp करें</a></nav></header>
+<header class="nav"><div class="brand"><div class="mark">श्री</div><div><b>श्रीबालाजी कम्युनिकेशन</b><small>Digital Services · Since 2017</small></div></div><nav class="navlinks"><a href="#home">होम</a><a href="#services">हमारी सेवाएँ</a><a href="#updates">नवीनतम सूचनाएँ</a><a href="#online-request">Request Online</a><a href="#contact">संपर्क</a><a class="btn" href="https://wa.me/917089748108" target="_blank" rel="noopener">WhatsApp करें</a></nav></header>
 <section class="hero" id="home"><div><span class="eyebrow">आपकी डिजिटल सेवाओं का भरोसेमंद केंद्र</span><h1>आपके हर ऑनलाइन काम का <span>आसान समाधान</span></h1><p>सरकारी ऑनलाइन आवेदन, परीक्षा एवं भर्ती फॉर्म, प्रिंटिंग, दस्तावेज़ और डिजिटल सेवाओं के लिए श्रीबालाजी कम्युनिकेशन, ईसागढ़ पर संपर्क करें।</p><div class="hero-actions"><a class="btn" href="https://wa.me/917089748108" target="_blank" rel="noopener">WhatsApp पर संपर्क करें ↗</a><a class="btn outline" href="#services">सेवाएँ देखें</a></div></div><aside class="hero-card"><h3>हमारी प्रमुख सेवाएँ</h3><div class="service-mini"><div class="ico">📝</div><div><b>ऑनलाइन फॉर्म</b><small>सरकारी एवं प्रवेश आवेदन</small></div></div><div class="service-mini"><div class="ico">🎓</div><div><b>भर्ती एवं परीक्षा</b><small>फॉर्म, एडमिट कार्ड, रिजल्ट</small></div></div><div class="service-mini"><div class="ico">🖨️</div><div><b>प्रिंटिंग एवं दस्तावेज़</b><small>प्रिंट, स्कैन और टाइपिंग</small></div></div><div class="service-mini"><div class="ico">💻</div><div><b>CSC एवं MP Online</b><small>डिजिटल एवं नागरिक सेवाएँ</small></div></div></aside></section>
 <section class="wrap" id="services"><div class="section-head"><span class="eyebrow">WHAT WE DO</span><h2>हमारी सेवाएँ</h2><p>एक ही स्थान पर विभिन्न ऑनलाइन एवं डिजिटल सुविधाएँ</p></div><div class="grid"><article class="card"><div class="ico">🏛️</div><h3>CSC एवं MP Online</h3><p>उपलब्ध नागरिक सेवाएँ, सरकारी योजनाओं के आवेदन एवं ऑनलाइन सहायता।</p></article><article class="card"><div class="ico">📋</div><h3>भर्ती एवं परीक्षा फॉर्म</h3><p>सरकारी नौकरी, प्रवेश परीक्षा, एडमिट कार्ड और रिजल्ट संबंधी सहायता।</p></article><article class="card"><div class="ico">🖨️</div><h3>प्रिंटिंग एवं स्कैनिंग</h3><p>प्रिंटआउट, फोटो, स्कैनिंग, दस्तावेज़ टाइपिंग और कॉपी सेवाएँ।</p></article><article class="card"><div class="ico">🛂</div><h3>पासपोर्ट एवं यात्रा</h3><p>पासपोर्ट आवेदन सहायता एवं रेलवे टिकट बुकिंग संबंधी सुविधा।</p></article><article class="card"><div class="ico">🚘</div><h3>ड्राइविंग लाइसेंस</h3><p>लर्निंग लाइसेंस एवं ड्राइविंग लाइसेंस सेवाओं के लिए आवेदन सहायता।</p></article><article class="card"><div class="ico">💼</div><h3>डिजिटल एवं अन्य सेवाएँ</h3><p>डिजिटल सिग्नेचर, आयकर रिटर्न और कंप्यूटर संबंधी सेवाएँ।</p></article></div></section>
-<section class="updates" id="updates"><div class="wrap"><div class="section-head"><span class="eyebrow">LATEST INFORMATION</span><h2>लेटेस्ट अपडेट एवं सूचनाएँ</h2><p>नई भर्ती, सरकारी योजनाओं और परीक्षा संबंधी जानकारी</p></div><div class="update-tools"><input id="updateSearch" type="search" placeholder="भर्ती, परीक्षा या योजना खोजें…" aria-label="अपडेट खोजें"><select id="updateCategoryFilter" aria-label="श्रेणी चुनें"><option value="all">सभी श्रेणियाँ</option><option>भर्ती / परीक्षा</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><p id="updateResultCount" style="max-width:850px;margin:0 auto 12px;color:#667085;font-size:13px"></p><div class="update-list" id="publicUpdates"></div></div></section>
+<section class="updates" id="updates"><div class="wrap"><div class="section-head"><span class="eyebrow">LATEST INFORMATION</span><h2>नवीनतम सूचनाएँ</h2><p>भर्ती, परीक्षा, एडमिट कार्ड, रिजल्ट, सरकारी योजनाएँ और प्रवेश संबंधी सभी महत्वपूर्ण सूचनाएँ एक ही स्थान पर</p></div><div class="update-tools"><input id="updateSearch" type="search" placeholder="अपडेट खोजें…" aria-label="अपडेट खोजें"><select id="updateCategoryFilter" aria-label="श्रेणी चुनें"><option value="all">सभी श्रेणियाँ</option><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><p id="updateResultCount" style="max-width:850px;margin:0 auto 12px;color:#667085;font-size:13px"></p><div class="update-list" id="publicUpdates"></div></div></section>
+<section class="wrap" id="online-request">
+  <div class="section-head"><span class="eyebrow">ONLINE SERVICE REQUEST</span><h2>Request Online</h2><p>जिस सेवा के लिए सहायता चाहिए, उसका अनुरोध भेजें। हमारी टीम आपसे संपर्क करेगी।</p></div>
+  <form id="onlineRequestForm" class="card request-form">
+    <div class="admin-grid"><div class="field"><label for="requestName">पूरा नाम *</label><input id="requestName" required maxlength="70" autocomplete="name" placeholder="अपना नाम लिखें"></div><div class="field"><label for="requestPhone">मोबाइल नंबर *</label><input id="requestPhone" required inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" autocomplete="tel" placeholder="10 अंकों का मोबाइल नंबर"></div></div>
+    <div class="field"><label for="requestService">किस सेवा के लिए अनुरोध है? *</label><select id="requestService" required><option value="">सेवा चुनें</option><option>सरकारी नौकरी / भर्ती फॉर्म</option><option>एडमिट कार्ड / रिजल्ट</option><option>कॉलेज / स्कूल एडमिशन</option><option>सरकारी योजना / प्रमाण पत्र</option><option>पैन कार्ड / आयकर सेवा</option><option>ड्राइविंग लाइसेंस</option><option>पासपोर्ट सेवा</option><option>अन्य ऑनलाइन फॉर्म</option></select></div>
+    <div class="field"><label for="requestDetails">अतिरिक्त जानकारी (वैकल्पिक)</label><textarea id="requestDetails" maxlength="500" placeholder="फॉर्म / परीक्षा का नाम या अपनी समस्या लिखें। यहाँ OTP, पासवर्ड या बैंक जानकारी न लिखें।"></textarea></div>
+    <button class="btn" type="submit" id="requestSubmit">अनुरोध भेजें</button><p id="requestMessage" role="status" aria-live="polite"></p><small style="color:#667085">आपकी जानकारी केवल इस अनुरोध पर संपर्क करने के लिए उपयोग होगी। कृपया कोई OTP, पासवर्ड या संवेदनशील दस्तावेज़ न भेजें।</small>
+  </form>
+</section>
 <section class="wrap" id="contact"><div class="section-head"><span class="eyebrow">GET IN TOUCH</span><h2>हमसे संपर्क करें</h2></div><div class="contact"><div class="contactbox"><h2>श्रीबालाजी कम्युनिकेशन</h2><p>आपकी डिजिटल सेवाओं के लिए आपका स्थानीय सेवा केंद्र। वर्ष 2017 से सेवाएँ प्रदान करने का अनुभव।</p><p>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</p><p>📞 <a href="tel:7089748108">7089748108</a></p><a class="btn" href="https://wa.me/917089748108" target="_blank" rel="noopener">WhatsApp पर बात करें</a></div><div class="card" style="padding:10px"><iframe title="श्रीबालाजी कम्युनिकेशन Google Map" src="https://www.google.com/maps?q=Shri%20Balaji%20Communication%2C%20Kadwaya%20Road%2C%20Isagarh%2C%20Madhya%20Pradesh&output=embed" width="100%" height="360" style="border:0;border-radius:12px;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div></section>
 <footer class="footer"><span>© 2026 श्रीबालाजी कम्युनिकेशन · Since 2017</span><span>ईसागढ़, मध्य प्रदेश · 7089748108</span></footer>
 <button class="btn dark admin-launch" id="officialLoginButton" type="button">⚙ Official Login</button>
