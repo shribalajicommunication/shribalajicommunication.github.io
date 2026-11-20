@@ -123,7 +123,14 @@ function renderAdminRequests() {
   const host = el('firebaseRequestItems');
   if (!host) return;
   const sorted = [...requestItems].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-  host.innerHTML = sorted.length ? sorted.map(r => `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions"><button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`).join('') : '<p class="empty">अभी कोई अनुरोध नहीं आया है।</p>';
+  host.innerHTML = sorted.length ? sorted.map(r => {
+    const phoneDigits = String(r.phone || '').replace(/\D/g, '');
+    const whatsappMessage = `नमस्ते ${r.name || ''} जी, आपने श्रीबालाजी कम्युनिकेशन की वेबसाइट पर ${r.service || 'सेवा'} के लिए अनुरोध भेजा था। कृपया बताएं कि हम आपकी कैसे सहायता कर सकते हैं।`;
+    const whatsappLink = /^[6-9]\d{9}$/.test(phoneDigits)
+      ? `<a class="btn" href="https://wa.me/91${phoneDigits}?text=${encodeURIComponent(whatsappMessage)}" target="_blank" rel="noopener noreferrer">WhatsApp पर संपर्क करें</a>`
+      : '';
+    return `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
+  }).join('') : '<p class="empty">अभी कोई अनुरोध नहीं आया है।</p>';
 }
 
 el('onlineRequestForm').addEventListener('submit', async event => {
@@ -136,7 +143,7 @@ el('onlineRequestForm').addEventListener('submit', async event => {
   try {
     await addDoc(requestsRef, {name:el('requestName').value.trim(), phone, service:el('requestService').value, details:el('requestDetails').value.trim(), status:'नया अनुरोध', createdAt:serverTimestamp()});
     el('onlineRequestForm').reset();
-    el('requestMessage').textContent = 'धन्यवाद! आपका अनुरोध सफलतापूर्वक दर्ज कर लिया गया है। हम जल्द ही आपसे संपर्क करेगें ।';
+    el('requestMessage').textContent = 'धन्यवाद! आपका अनुरोध मिल गया है। श्रीबालाजी कम्युनिकेशन आपसे संपर्क करेगा।';
   } catch (error) {
     console.error('Online request error:', error);
     el('requestMessage').textContent = 'अनुरोध अभी जमा नहीं हुआ। कृपया WhatsApp पर संपर्क करें: 7089748108';
