@@ -136,7 +136,7 @@ el('onlineRequestForm').addEventListener('submit', async event => {
   try {
     await addDoc(requestsRef, {name:el('requestName').value.trim(), phone, service:el('requestService').value, details:el('requestDetails').value.trim(), status:'नया अनुरोध', createdAt:serverTimestamp()});
     el('onlineRequestForm').reset();
-    el('requestMessage').textContent = 'धन्यवाद! आपका अनुरोध मिल गया है। श्रीबालाजी कम्युनिकेशन आपसे संपर्क करेगा।';
+    el('requestMessage').textContent = 'धन्यवाद! आपका अनुरोध सफलतापूर्वक दर्ज कर लिया गया है। हम जल्द ही आपसे संपर्क करेगें ।';
   } catch (error) {
     console.error('Online request error:', error);
     el('requestMessage').textContent = 'अनुरोध अभी जमा नहीं हुआ। कृपया WhatsApp पर संपर्क करें: 7089748108';
