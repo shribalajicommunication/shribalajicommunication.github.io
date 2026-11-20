@@ -20,6 +20,12 @@
 .update.pinned{border:1px solid #e7bd59;box-shadow:0 5px 18px #b9851b18}
 
 .job-deadline{margin:10px 0;color:#a33b18;font-size:14px}.request-form{max-width:760px;margin:0 auto}.request-form .field{margin:8px 0}.request-form button{min-width:180px}.request-item{align-items:flex-start}@media(max-width:760px){.request-item{flex-direction:column}}
+.request-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 26px}
+.request-stat{background:#fff7ef;border:1px solid #f0ddcb;border-radius:14px;padding:16px}
+.request-stat span{display:block;color:#667085;font-size:13px;font-weight:700}
+.request-stat strong{display:block;color:#172033;font-size:28px;margin-top:5px}
+@media(max-width:760px){.request-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
@@ -62,6 +68,14 @@ shell.innerHTML = `
   </div>
   <div id="firebaseAdminArea" class="hidden">
     <div class="admin-actions" style="justify-content:space-between;align-items:center"><span id="firebaseAdminIdentity"></span><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div>
+    <div class="admin-items"><h3>Request Online – Dashboard</h3>
+      <div class="request-stats" aria-live="polite">
+        <div class="request-stat"><span>कुल अनुरोध</span><strong id="statTotalRequests">0</strong></div>
+        <div class="request-stat"><span>पिछले 24 घंटे में नए</span><strong id="statNewRequests">0</strong></div>
+        <div class="request-stat"><span>लंबित अनुरोध</span><strong id="statPendingRequests">0</strong></div>
+        <div class="request-stat"><span>पूरे किए गए</span><strong id="statCompletedRequests">0</strong></div>
+      </div>
+    </div>
     <form id="firebaseUpdateForm">
       <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">अपडेट की तारीख</label><input id="firebaseDate" type="date"></div></div>
       <div class="field"><label for="firebaseTitle">शीर्षक</label><input id="firebaseTitle" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div>
@@ -122,6 +136,14 @@ function renderPublicUpdates() {
 function renderAdminRequests() {
   const host = el('firebaseRequestItems');
   if (!host) return;
+  const nowSeconds = Date.now() / 1000;
+  const completedCount = requestItems.filter(r => r.status === 'पूरा हुआ').length;
+  const pendingCount = requestItems.length - completedCount;
+  const newCount = requestItems.filter(r => r.createdAt?.seconds && nowSeconds - r.createdAt.seconds <= 24 * 60 * 60).length;
+  el('statTotalRequests').textContent = requestItems.length;
+  el('statNewRequests').textContent = newCount;
+  el('statPendingRequests').textContent = pendingCount;
+  el('statCompletedRequests').textContent = completedCount;
   const sorted = [...requestItems].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   host.innerHTML = sorted.length ? sorted.map(r => {
     const phoneDigits = String(r.phone || '').replace(/\D/g, '');
