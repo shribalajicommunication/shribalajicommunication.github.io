@@ -47,6 +47,27 @@
 @media(max-width:480px){.admin-login-wrap{margin:12px auto}.admin-login-card{padding:22px 17px;border-radius:19px}.admin-login-logo{width:100px;height:100px}}
 
 .revenue-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px;max-width:620px}.revenue-edit label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:4px}.revenue-edit input,.revenue-edit select{width:100%;min-width:0;padding:9px;border:1px solid #d0d5dd;border-radius:8px;background:#fff}.revenue-save{margin-top:8px}.receipt-btn{margin:8px 0 0 6px;background:#16834a}
+
+/* Compact, easy-to-use Admin Panel sections */
+.admin{padding:12px}
+.admin-shell{max-width:900px;margin:10px auto;padding:18px}
+.admin-section{margin:12px 0;border:1px solid #e6e8ed;border-radius:14px;background:#fff;overflow:hidden}
+.admin-section>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;font-weight:800;color:#172033;background:#fffaf5}
+.admin-section>summary::-webkit-details-marker{display:none}
+.admin-section>summary:after{content:'+';font-size:20px;line-height:1;color:#e87519;font-weight:800;margin-left:auto}
+.admin-section[open]>summary:after{content:'−'}
+.admin-section>summary small{font-weight:500;color:#667085;font-size:12px}
+.admin-section-body{padding:12px 16px 16px;border-top:1px solid #f0f1f3}
+.admin-section-body>.admin-items{margin-top:8px}
+.admin-section-body .request-stats{margin:8px 0 16px;gap:8px}
+.admin-section-body .request-stat{padding:11px 12px}
+.admin-section-body .request-stat strong{font-size:23px}
+.admin-section-body .field{margin:8px 0}
+.admin-section-body .admin-item{padding:10px 0}
+.admin-section-body .request-tools{margin:8px 0!important}
+.admin-requests>summary{background:#fff3e8}
+@media(max-width:600px){.admin{padding:6px}.admin-shell{padding:12px;margin:4px auto;border-radius:14px}.admin-section>summary{padding:12px}.admin-section>summary small{width:100%;order:2}.admin-section-body{padding:10px}}
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
@@ -95,13 +116,49 @@ shell.innerHTML = `
   </div>
   <div id="firebaseAdminArea" class="hidden">
     <div class="admin-actions" style="justify-content:space-between;align-items:center"><span id="firebaseAdminIdentity"></span><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div>
-    <div class="admin-items"><h3>Request Online – Dashboard</h3>
+    <details class="admin-section admin-requests" open>
+      <summary><span>ग्राहक अनुरोध</span><small>अनुरोध देखें · स्टेटस बदलें · भुगतान दर्ज करें</small></summary>
+      <div class="admin-section-body">
       <div class="request-stats" aria-live="polite">
         <div class="request-stat"><span>कुल अनुरोध</span><strong id="statTotalRequests">0</strong></div>
         <div class="request-stat"><span>पिछले 24 घंटे में नए</span><strong id="statNewRequests">0</strong></div>
         <div class="request-stat"><span>लंबित अनुरोध</span><strong id="statPendingRequests">0</strong></div>
         <div class="request-stat"><span>पूरे किए गए</span><strong id="statCompletedRequests">0</strong></div>
       </div>
+    <div class="admin-items"><h3 style="margin:0 0 8px">अनुरोधों की सूची</h3>
+      <div class="request-tools" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0;align-items:end">
+        <div class="field"><label for="requestSearch">नाम / मोबाइल / सेवा खोजें</label><input id="requestSearch" type="search" placeholder="नाम, मोबाइल या सेवा"></div>
+        <div class="field"><label for="requestDateFrom">कब से</label><input id="requestDateFrom" type="date"></div>
+        <div class="field"><label for="requestDateTo">कब तक</label><input id="requestDateTo" type="date"></div>
+        <div class="admin-actions" style="margin:10px 0"><button class="btn outline" type="button" id="clearRequestFilters">फ़िल्टर हटाएँ</button><button class="btn" type="button" id="exportRequestsCsv">Excel / CSV डाउनलोड</button></div>
+      </div>
+      <p id="requestFilterCount" class="empty" aria-live="polite">सभी अनुरोध दिखाए जा रहे हैं।</p><div id="firebaseRequestItems"></div>
+    </div>
+      </div>
+    </details>
+    <details class="admin-section">
+      <summary><span>नई सूचना प्रकाशित करें</span><small>वेबसाइट पर नई भर्ती, योजना या सूचना जोड़ें</small></summary>
+      <div class="admin-section-body">
+    <form id="firebaseUpdateForm">
+      <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">अपडेट की तारीख</label><input id="firebaseDate" type="date"></div></div>
+      <div class="field"><label for="firebaseTitle">शीर्षक</label><input id="firebaseTitle" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div>
+      <div class="field"><label for="firebaseDescription">विवरण</label><textarea id="firebaseDescription" placeholder="मुख्य जानकारी, पात्रता, आवेदन प्रक्रिया आदि"></textarea></div>
+      <div class="admin-grid"><div class="field"><label for="firebaseLastDate">आवेदन की अंतिम तारीख (वैकल्पिक)</label><input id="firebaseLastDate" type="date"></div><div class="field"><label for="firebaseApplyUrl">आधिकारिक आवेदन / जानकारी लिंक (वैकल्पिक)</label><input id="firebaseApplyUrl" type="url" placeholder="https://..."></div></div>
+      <div class="field"><label for="firebaseImage">पोस्टर / फोटो (JPG, PNG या WEBP; अधिकतम 5 MB)</label><input id="firebaseImage" type="file" accept="image/jpeg,image/png,image/webp"><small id="firebaseImageStatus">फोटो लगाना वैकल्पिक है। एडिट करते समय नई फोटो न चुनें तो पुरानी फोटो बनी रहेगी।</small></div>
+      <label class="pin-control"><input id="firebasePinned" type="checkbox"> 📌 इस अपडेट को सबसे ऊपर Pin करें</label>
+      <div class="admin-actions"><button class="btn" type="submit" id="firebaseSave">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="firebaseCancelEdit">एडिट रद्द करें</button></div>
+    </form>
+      </div>
+    </details>
+    <details class="admin-section">
+      <summary><span>प्रकाशित सूचनाएँ प्रबंधित करें</span><small>पुरानी सूचना एडिट, Pin या डिलीट करें</small></summary>
+      <div class="admin-section-body">
+    <div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="firebaseAdminItems"></div></div>
+      </div>
+    </details>
+    <details class="admin-section">
+      <summary><span>मासिक रिपोर्ट एवं आय</span><small>महीने के अनुरोध और भुगतान का हिसाब</small></summary>
+      <div class="admin-section-body">
       <section class="admin-items" style="margin-top:14px;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff">
         <h3 style="margin-top:0">मासिक रिपोर्ट एवं आय</h3>
         <div class="field" style="max-width:260px"><label for="revenueMonth">रिपोर्ट का महीना</label><input id="revenueMonth" type="month"></div>
@@ -113,26 +170,8 @@ shell.innerHTML = `
         </div>
         <p class="empty" id="revenueReportNote" style="margin-bottom:0">आय का हिसाब भुगतान की दर्ज तारीख के आधार पर होगा।</p>
       </section>
-    </div>
-    <form id="firebaseUpdateForm">
-      <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">अपडेट की तारीख</label><input id="firebaseDate" type="date"></div></div>
-      <div class="field"><label for="firebaseTitle">शीर्षक</label><input id="firebaseTitle" required placeholder="जैसे MPESB भर्ती आवेदन शुरू"></div>
-      <div class="field"><label for="firebaseDescription">विवरण</label><textarea id="firebaseDescription" placeholder="मुख्य जानकारी, पात्रता, आवेदन प्रक्रिया आदि"></textarea></div>
-      <div class="admin-grid"><div class="field"><label for="firebaseLastDate">आवेदन की अंतिम तारीख (वैकल्पिक)</label><input id="firebaseLastDate" type="date"></div><div class="field"><label for="firebaseApplyUrl">आधिकारिक आवेदन / जानकारी लिंक (वैकल्पिक)</label><input id="firebaseApplyUrl" type="url" placeholder="https://..."></div></div>
-      <div class="field"><label for="firebaseImage">पोस्टर / फोटो (JPG, PNG या WEBP; अधिकतम 5 MB)</label><input id="firebaseImage" type="file" accept="image/jpeg,image/png,image/webp"><small id="firebaseImageStatus">फोटो लगाना वैकल्पिक है। एडिट करते समय नई फोटो न चुनें तो पुरानी फोटो बनी रहेगी।</small></div>
-      <label class="pin-control"><input id="firebasePinned" type="checkbox"> 📌 इस अपडेट को सबसे ऊपर Pin करें</label>
-      <div class="admin-actions"><button class="btn" type="submit" id="firebaseSave">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="firebaseCancelEdit">एडिट रद्द करें</button></div>
-    </form>
-    <div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="firebaseAdminItems"></div></div>
-    <div class="admin-items"><h3>Request Online – ग्राहकों के अनुरोध</h3>
-      <div class="request-tools" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0;align-items:end">
-        <div class="field"><label for="requestSearch">नाम / मोबाइल / सेवा खोजें</label><input id="requestSearch" type="search" placeholder="नाम, मोबाइल या सेवा"></div>
-        <div class="field"><label for="requestDateFrom">कब से</label><input id="requestDateFrom" type="date"></div>
-        <div class="field"><label for="requestDateTo">कब तक</label><input id="requestDateTo" type="date"></div>
-        <div class="admin-actions" style="margin:10px 0"><button class="btn outline" type="button" id="clearRequestFilters">फ़िल्टर हटाएँ</button><button class="btn" type="button" id="exportRequestsCsv">Excel / CSV डाउनलोड</button></div>
       </div>
-      <p id="requestFilterCount" class="empty" aria-live="polite">सभी अनुरोध दिखाए जा रहे हैं।</p><div id="firebaseRequestItems"></div>
-    </div>
+    </details>
   </div>`;
 
 const el = id => document.getElementById(id);
