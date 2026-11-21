@@ -46,7 +46,7 @@
 .admin-login-foot{font-size:12px;color:#98a2b3;margin-top:16px}
 @media(max-width:480px){.admin-login-wrap{margin:12px auto}.admin-login-card{padding:22px 17px;border-radius:19px}.admin-login-logo{width:100px;height:100px}}
 
-.revenue-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px;max-width:620px}.revenue-edit label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:4px}.revenue-edit input,.revenue-edit select{width:100%;min-width:0;padding:9px;border:1px solid #d0d5dd;border-radius:8px;background:#fff}.revenue-save{margin-top:8px}
+.revenue-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px;max-width:620px}.revenue-edit label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:4px}.revenue-edit input,.revenue-edit select{width:100%;min-width:0;padding:9px;border:1px solid #d0d5dd;border-radius:8px;background:#fff}.revenue-save{margin-top:8px}.receipt-btn{margin:8px 0 0 6px;background:#16834a}
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
@@ -241,7 +241,7 @@ function renderAdminRequests() {
         <div><label for="paid-date-${escapeHtml(r.id)}">भुगतान तारीख</label><input id="paid-date-${escapeHtml(r.id)}" type="date" value="${escapeHtml(paidDate)}"></div>
       </div>
       <button class="btn outline revenue-save" type="button" data-payment-save="${escapeHtml(r.id)}">शुल्क / भुगतान सेव करें</button>
-      ${r.paymentStatus === 'Paid' ? `<small style="display:block;color:#067647;margin-top:5px">✓ भुगतान प्राप्त: ${formatINR(r.fee)}</small>` : `<small style="display:block;color:#b54708;margin-top:5px">भुगतान बाकी: ${formatINR(r.fee)}</small>`}
+      ${r.paymentStatus === 'Paid' ? `<small style="display:block;color:#067647;margin-top:5px">✓ भुगतान प्राप्त: ${formatINR(r.fee)}</small><button class="btn receipt-btn" type="button" data-payment-receipt="${escapeHtml(r.id)}">रसीद प्रिंट / PDF</button>` : `<small style="display:block;color:#b54708;margin-top:5px">भुगतान बाकी: ${formatINR(r.fee)}</small>`}
       </div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
   }).join('') : '<p class="empty">इस खोज या तारीख में कोई अनुरोध नहीं मिला।</p>';
 }
@@ -285,6 +285,25 @@ el('revenueMonth').value = new Date().toISOString().slice(0,7);
 el('revenueMonth').addEventListener('change', renderRevenueReport);
 
 el('firebaseRequestItems').addEventListener('click', async event => {
+  const receiptButton = event.target.closest('[data-payment-receipt]');
+  if (receiptButton) {
+    const receiptWindow = window.open('', '_blank');
+    if (!receiptWindow) { alert('रसीद खोलने के लिए कृपया इस वेबसाइट के Pop-ups की अनुमति दें।'); return; }
+    const receiptId = receiptButton.dataset.paymentReceipt;
+    const customer = requestItems.find(r => r.id === receiptId);
+    if (!customer || customer.paymentStatus !== 'Paid') { receiptWindow.close(); alert('रसीद केवल Paid अनुरोध के लिए बनेगी।'); return; }
+    const receiptNumber = customer.receiptNumber || `SBC-${new Date().getFullYear()}-${receiptId.slice(-6).toUpperCase()}`;
+    try {
+      if (!customer.receiptNumber) await updateDoc(doc(db, 'serviceRequests', receiptId), {receiptNumber, receiptIssuedAt: serverTimestamp()});
+      const paidDate = customer.paidAt?.seconds ? new Date(customer.paidAt.seconds * 1000).toLocaleDateString('hi-IN') : (customer.paidAt || new Date().toLocaleDateString('hi-IN'));
+      const esc = escapeHtml;
+      receiptWindow.document.write(`<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Receipt ${esc(receiptNumber)}</title><style>body{font-family:Arial,'Noto Sans Devanagari',sans-serif;color:#172033;margin:0;padding:28px;background:#f4f5f7}.receipt{max-width:700px;margin:20px auto;background:#fff;border:2px solid #e87519;border-radius:16px;padding:30px}.head{text-align:center;border-bottom:1px solid #eadfd5;padding-bottom:18px}.head h1{margin:0;color:#c65b0b}.head p{margin:6px 0}.tag{display:inline-block;background:#e8f7ee;color:#067647;padding:6px 14px;border-radius:20px;font-weight:bold;margin-top:8px}.meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:20px 0}.row{display:flex;justify-content:space-between;padding:13px 4px;border-bottom:1px solid #eee;gap:20px}.amount{font-size:24px;font-weight:bold;color:#067647}.foot{text-align:center;margin-top:28px;color:#667085;font-size:13px}.actions{text-align:center;margin:18px}.actions button{background:#e87519;color:#fff;border:0;padding:11px 20px;border-radius:9px;font-size:15px;cursor:pointer}@media print{body{background:#fff;padding:0}.receipt{margin:0 auto;border:2px solid #e87519;box-shadow:none}.actions{display:none}}</style></head><body><main class="receipt"><header class="head"><h1>श्रीबालाजी कम्युनिकेशन</h1><p>कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</p><p>मोबाइल: 7089748108 · Since 2017</p><div class="tag">भुगतान प्राप्त रसीद · PAID</div></header><div class="meta"><span><b>रसीद नंबर:</b> ${esc(receiptNumber)}</span><span><b>भुगतान तारीख:</b> ${esc(paidDate)}</span></div><div class="row"><b>ग्राहक का नाम</b><span>${esc(customer.name || '-')}</span></div><div class="row"><b>मोबाइल नंबर</b><span>${esc(customer.phone || '-')}</span></div><div class="row"><b>सेवा</b><span>${esc(customer.service || '-')}</span></div><div class="row"><b>भुगतान स्थिति</b><span>Paid / भुगतान प्राप्त</span></div><div class="row"><b>कुल जमा राशि</b><span class="amount">${esc(formatINR(customer.fee))}</span></div><footer class="foot">आपके विश्वास के लिए धन्यवाद!<br>यह कंप्यूटर द्वारा जनरेट की गई रसीद है।</footer></main><div class="actions"><button onclick="window.print()">प्रिंट करें / PDF सेव करें</button></div></body></html>`);
+      receiptWindow.document.close();
+    } catch (error) {
+      receiptWindow.close(); console.error('Receipt error:', error); alert('रसीद तैयार नहीं हुई। कृपया दोबारा प्रयास करें।');
+    }
+    return;
+  }
   const saveButton = event.target.closest('[data-payment-save]');
   const paymentId = saveButton?.dataset.paymentSave;
   const doneId = event.target.closest('[data-request-done]')?.dataset.requestDone;
