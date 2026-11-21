@@ -175,7 +175,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js';
-import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, getDoc, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAOzHP3bOvs_0OLLathBdlzZc1ZrBJWW_I',
@@ -561,19 +561,46 @@ el('onlineRequestForm').addEventListener('submit', async event => {
   event.preventDefault();
   const btn = el('requestSubmit');
   const phone = el('requestPhone').value.replace(/\D/g, '');
-  if (!/^[6-9]\d{9}$/.test(phone)) { el('requestMessage').textContent = 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।'; return; }
+  const message = el('requestMessage');
+  if (!/^[6-9]\d{9}$/.test(phone)) { message.textContent = 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।'; return; }
   btn.disabled = true;
-  el('requestMessage').textContent = 'आपका अनुरोध भेजा जा रहा है…';
+  message.textContent = 'आपका अनुरोध और Tracking Number सुरक्षित किए जा रहे हैं…';
   try {
-    const requestDoc = await addDoc(requestsRef, {name:el('requestName').value.trim(), phone, service:el('requestService').value, details:el('requestDetails').value.trim(), status:'नया अनुरोध', createdAt:serverTimestamp()});
-    const trackingCode = 'SBC' + Array.from(crypto.getRandomValues(new Uint8Array(8)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
-    await setDoc(doc(db, 'publicTracking', trackingCode), {status:'नया अनुरोध', service:el('requestService').value, createdAt:serverTimestamp(), updatedAt:serverTimestamp()});
-    await updateDoc(doc(db, 'serviceRequests', requestDoc.id), {trackingCode});
+    // Generate the tracking number BEFORE saving either document.
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const trackingCode = 'SBC' + Array.from(crypto.getRandomValues(new Uint8Array(8)), byte => alphabet[byte % alphabet.length]).join('');
+    const service = el('requestService').value;
+    const requestRef = doc(requestsRef);
+    const batch = writeBatch(db);
+
+    // Save the customer request (including its tracking code) and the public
+    // tracking record atomically. This prevents a request appearing in Admin
+    // without a usable tracking number if a later write is rejected.
+    batch.set(requestRef, {
+      name: el('requestName').value.trim(),
+      phone,
+      service,
+      details: el('requestDetails').value.trim(),
+      status: 'नया अनुरोध',
+      trackingCode,
+      createdAt: serverTimestamp()
+    });
+    batch.set(doc(db, 'publicTracking', trackingCode), {
+      status: 'नया अनुरोध',
+      service,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    await batch.commit();
+
     el('onlineRequestForm').reset();
-    el('requestMessage').innerHTML = `धन्यवाद! आपका अनुरोध मिल गया है।<br>आपका Tracking Number: <span class="tracking-code">${escapeHtml(trackingCode)}</span><br>इसे सुरक्षित रखें। इसी नंबर से वेबसाइट पर काम की स्थिति देख सकते हैं।`;
+    message.innerHTML = `धन्यवाद! आपका अनुरोध सफलतापूर्वक जमा हो गया है।<br>आपका Tracking Number: <span class="tracking-code">${escapeHtml(trackingCode)}</span><br>इसे सुरक्षित रखें। इसी नंबर से वेबसाइट पर काम की स्थिति देख सकते हैं।`;
   } catch (error) {
-    console.error('Online request error:', error);
-    el('requestMessage').textContent = 'अनुरोध अभी जमा नहीं हुआ। कृपया WhatsApp पर संपर्क करें: 7089748108';
+    console.error('Online request / tracking save error:', error);
+    const code = error?.code || '';
+    message.textContent = code === 'permission-denied'
+      ? 'अनुरोध और Tracking Number सेव नहीं हो सके। Firestore Rules में serviceRequests के create और publicTracking के create की अनुमति जाँचें। कृपया WhatsApp पर संपर्क करें: 7089748108'
+      : `अनुरोध जमा नहीं हुआ (${code || 'नेटवर्क त्रुटि'}). कृपया दोबारा प्रयास करें या WhatsApp पर संपर्क करें: 7089748108`;
   } finally { btn.disabled = false; }
 });
 
