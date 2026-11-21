@@ -46,6 +46,7 @@
 .admin-login-foot{font-size:12px;color:#98a2b3;margin-top:16px}
 @media(max-width:480px){.admin-login-wrap{margin:12px auto}.admin-login-card{padding:22px 17px;border-radius:19px}.admin-login-logo{width:100px;height:100px}}
 
+.revenue-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px;max-width:620px}.revenue-edit label{display:block;font-size:12px;font-weight:700;color:#475467;margin-bottom:4px}.revenue-edit input,.revenue-edit select{width:100%;min-width:0;padding:9px;border:1px solid #d0d5dd;border-radius:8px;background:#fff}.revenue-save{margin-top:8px}
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
@@ -101,6 +102,17 @@ shell.innerHTML = `
         <div class="request-stat"><span>लंबित अनुरोध</span><strong id="statPendingRequests">0</strong></div>
         <div class="request-stat"><span>पूरे किए गए</span><strong id="statCompletedRequests">0</strong></div>
       </div>
+      <section class="admin-items" style="margin-top:14px;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff">
+        <h3 style="margin-top:0">मासिक रिपोर्ट एवं आय</h3>
+        <div class="field" style="max-width:260px"><label for="revenueMonth">रिपोर्ट का महीना</label><input id="revenueMonth" type="month"></div>
+        <div class="request-stats" style="margin-bottom:0">
+          <div class="request-stat"><span>इस माह के अनुरोध</span><strong id="monthRequestCount">0</strong></div>
+          <div class="request-stat"><span>इस माह पूरे काम</span><strong id="monthCompletedCount">0</strong></div>
+          <div class="request-stat"><span>इस माह प्राप्त आय</span><strong id="monthPaidAmount">₹0</strong></div>
+          <div class="request-stat"><span>लंबित भुगतान</span><strong id="monthPendingAmount">₹0</strong></div>
+        </div>
+        <p class="empty" id="revenueReportNote" style="margin-bottom:0">आय का हिसाब भुगतान की दर्ज तारीख के आधार पर होगा।</p>
+      </section>
     </div>
     <form id="firebaseUpdateForm">
       <div class="admin-grid"><div class="field"><label for="firebaseCategory">अपडेट का प्रकार</label><select id="firebaseCategory"><option>भर्ती / परीक्षा</option><option>एडमिट कार्ड</option><option>रिजल्ट</option><option>सरकारी योजना</option><option>प्रवेश / शिक्षा</option><option>दुकान की सूचना</option></select></div><div class="field"><label for="firebaseDate">अपडेट की तारीख</label><input id="firebaseDate" type="date"></div></div>
@@ -178,6 +190,28 @@ function getFilteredAdminRequests() {
     return (!query || haystack.includes(query)) && (!from || (day && day >= from)) && (!to || (day && day <= to));
   }).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 }
+function formatINR(value) {
+  return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(value)||0);
+}
+function getMonthKeyFromTimestamp(value) {
+  if (!value) return '';
+  const date = value.seconds ? new Date(value.seconds * 1000) : (value.toDate ? value.toDate() : new Date(value));
+  return Number.isNaN(date.getTime()) ? '' : `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+}
+function renderRevenueReport() {
+  const month = el('revenueMonth')?.value || new Date().toISOString().slice(0,7);
+  const monthRequests = requestItems.filter(r => getMonthKeyFromTimestamp(r.createdAt) === month);
+  const monthCompleted = monthRequests.filter(r => r.status === 'पूरा हुआ').length;
+  const paidThisMonth = requestItems.filter(r => r.paymentStatus === 'Paid' && getMonthKeyFromTimestamp(r.paidAt) === month);
+  const pendingThisMonth = monthRequests.filter(r => r.paymentStatus !== 'Paid');
+  const paidTotal = paidThisMonth.reduce((sum,r)=>sum+(Number(r.fee)||0),0);
+  const pendingTotal = pendingThisMonth.reduce((sum,r)=>sum+(Number(r.fee)||0),0);
+  el('monthRequestCount').textContent = monthRequests.length;
+  el('monthCompletedCount').textContent = monthCompleted;
+  el('monthPaidAmount').textContent = formatINR(paidTotal);
+  el('monthPendingAmount').textContent = formatINR(pendingTotal);
+  el('revenueReportNote').textContent = `प्राप्त आय में ${paidThisMonth.length} भुगतान शामिल हैं। लंबित राशि इस माह आए उन अनुरोधों की है जिनका भुगतान Pending है।`;
+}
 function renderAdminRequests() {
   const host = el('firebaseRequestItems');
   if (!host) return;
@@ -189,16 +223,26 @@ function renderAdminRequests() {
   el('statNewRequests').textContent = newCount;
   el('statPendingRequests').textContent = pendingCount;
   el('statCompletedRequests').textContent = completedCount;
+  renderRevenueReport();
   const sorted = getFilteredAdminRequests();
   el('requestFilterCount').textContent = `${sorted.length} / ${requestItems.length} अनुरोध दिखाए जा रहे हैं।`;
   host.innerHTML = sorted.length ? sorted.map(r => {
-    const phoneDigits = String(r.phone || '').replace(/\D/g, '');
+    const phoneDigits = String(r.phone || '').replace(/\\D/g, '');
     const whatsappMessage = `नमस्ते ${r.name || ''} जी, आपने श्रीबालाजी कम्युनिकेशन की वेबसाइट पर ${r.service || 'सेवा'} के लिए अनुरोध भेजा था। कृपया बताएं कि हम आपकी कैसे सहायता कर सकते हैं।`;
-    const whatsappLink = /^[6-9]\d{9}$/.test(phoneDigits)
+    const whatsappLink = /^[6-9]\\d{9}$/.test(phoneDigits)
       ? `<a class="btn" href="https://wa.me/91${phoneDigits}?text=${encodeURIComponent(whatsappMessage)}" target="_blank" rel="noopener noreferrer">WhatsApp पर संपर्क करें</a>`
       : '';
     const created = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleString('hi-IN') : 'तारीख उपलब्ध नहीं';
-    return `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')} · ${escapeHtml(created)}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
+    const paidDate = r.paidAt?.seconds ? new Date(r.paidAt.seconds * 1000).toLocaleDateString('en-CA') : (r.paidAt || '');
+    return `<div class="admin-item request-item"><div style="flex:1;min-width:240px"><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')} · ${escapeHtml(created)}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p>
+      <div class="revenue-edit">
+        <div><label for="fee-${escapeHtml(r.id)}">सेवा शुल्क (₹)</label><input id="fee-${escapeHtml(r.id)}" type="number" min="0" step="1" value="${Number(r.fee)||0}" placeholder="जैसे 200"></div>
+        <div><label for="payment-${escapeHtml(r.id)}">भुगतान स्थिति</label><select id="payment-${escapeHtml(r.id)}"><option value="Pending" ${r.paymentStatus !== 'Paid' ? 'selected' : ''}>Pending</option><option value="Paid" ${r.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option></select></div>
+        <div><label for="paid-date-${escapeHtml(r.id)}">भुगतान तारीख</label><input id="paid-date-${escapeHtml(r.id)}" type="date" value="${escapeHtml(paidDate)}"></div>
+      </div>
+      <button class="btn outline revenue-save" type="button" data-payment-save="${escapeHtml(r.id)}">शुल्क / भुगतान सेव करें</button>
+      ${r.paymentStatus === 'Paid' ? `<small style="display:block;color:#067647;margin-top:5px">✓ भुगतान प्राप्त: ${formatINR(r.fee)}</small>` : `<small style="display:block;color:#b54708;margin-top:5px">भुगतान बाकी: ${formatINR(r.fee)}</small>`}
+      </div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
   }).join('') : '<p class="empty">इस खोज या तारीख में कोई अनुरोध नहीं मिला।</p>';
 }
 function exportAdminRequestsCsv() {
@@ -209,7 +253,7 @@ function exportAdminRequestsCsv() {
     if (/^[=+\-@]/.test(v)) v = "'" + v;
     return `"${v.replace(/"/g, '""')}"`;
   };
-  const data = [['नाम','मोबाइल','सेवा','विवरण','स्थिति','तारीख'], ...rows.map(r => [r.name,r.phone,r.service,r.details,r.status,r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleString('en-IN') : ''])];
+  const data = [['नाम','मोबाइल','सेवा','विवरण','कार्य स्थिति','सेवा शुल्क (₹)','भुगतान स्थिति','भुगतान तारीख','अनुरोध तारीख'], ...rows.map(r => [r.name,r.phone,r.service,r.details,r.status,Number(r.fee)||0,r.paymentStatus || 'Pending',r.paidAt?.seconds ? new Date(r.paidAt.seconds * 1000).toLocaleDateString('en-IN') : (r.paidAt || ''),r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleString('en-IN') : ''])];
   const csv = '\uFEFF' + data.map(row => row.map(safe).join(',')).join('\r\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -237,6 +281,8 @@ el('onlineRequestForm').addEventListener('submit', async event => {
 ['requestSearch','requestDateFrom','requestDateTo'].forEach(id => el(id).addEventListener(id === 'requestSearch' ? 'input' : 'change', renderAdminRequests));
 el('clearRequestFilters').addEventListener('click', () => { el('requestSearch').value = ''; el('requestDateFrom').value = ''; el('requestDateTo').value = ''; renderAdminRequests(); });
 el('exportRequestsCsv').addEventListener('click', exportAdminRequestsCsv);
+el('revenueMonth').value = new Date().toISOString().slice(0,7);
+el('revenueMonth').addEventListener('change', renderRevenueReport);
 
 el('firebaseRequestItems').addEventListener('click', async event => {
   const doneId = event.target.dataset.requestDone;
