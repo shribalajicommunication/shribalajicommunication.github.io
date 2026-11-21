@@ -155,6 +155,22 @@
   .admin .request-card-footer .btn{min-height:38px;padding:8px 10px;flex:1 1 auto}
 }
 
+/* New customer request notifications */
+.admin-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:7px 0 12px;border-bottom:1px solid #edf0f3}
+.admin-notification-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-notification-state{font-size:11px;color:#667085;font-weight:650}
+.admin .notification-enable{min-height:32px;padding:6px 10px;font-size:11px}
+.admin .notification-enable:disabled{opacity:.75;cursor:default}
+.request-notification-stack{position:fixed;top:14px;right:14px;z-index:30;width:min(360px,calc(100vw - 28px));display:grid;gap:8px;pointer-events:none}
+.request-live-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #f0c28c;border-left:4px solid #e87519;border-radius:12px;padding:12px;box-shadow:0 10px 28px #10182826;color:#202638}
+.request-live-toast .toast-copy{min-width:0;flex:1}
+.request-live-toast strong{display:block;font-size:13px;color:#172033}
+.request-live-toast small{display:block;font-size:11px;line-height:1.5;color:#667085;margin-top:3px;overflow-wrap:anywhere}
+.request-live-toast .toast-actions{display:flex;gap:5px;flex-shrink:0}
+.request-live-toast button{border:0;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:750;cursor:pointer;background:#fff1e5;color:#a94c0a}
+.request-live-toast button.toast-close{background:#f2f4f7;color:#475467}
+@media(max-width:520px){.request-notification-stack{top:8px;right:8px;width:calc(100vw - 16px)}.admin-notification-tools{width:100%;justify-content:flex-start}.admin-notification-state{flex:1}}
+
 </style>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
@@ -179,6 +195,7 @@ const updatesRef = collection(db, 'updates');
 const requestsRef = collection(db, 'serviceRequests');
 let requestItems = [];
 let stopRequestsListener = null;
+let requestSnapshotInitialized = false;
 const admin = document.getElementById('admin');
 const shell = admin.querySelector('.admin-shell');
 let items = [];
@@ -202,7 +219,8 @@ shell.innerHTML = `
     </div></div>
   </div>
   <div id="firebaseAdminArea" class="hidden">
-    <div class="admin-topbar"><div><span class="admin-panel-kicker">SHRI BALAJI COMMUNICATION</span><span id="firebaseAdminIdentity" class="admin-identity"></span></div><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div>
+    <div class="admin-topbar"><div><span class="admin-panel-kicker">SHRI BALAJI COMMUNICATION</span><span id="firebaseAdminIdentity" class="admin-identity"></span></div><div class="admin-notification-tools"><span id="requestNotificationState" class="admin-notification-state" aria-live="polite">ब्राउज़र सूचना उपलब्धता जाँच रहे हैं…</span><button class="btn outline notification-enable" id="enableRequestNotifications" type="button">🔔 सूचना चालू करें</button><button class="btn outline" id="firebaseLogout" type="button">लॉगआउट</button></div></div>
+    <div id="requestNotificationToast" class="request-notification-stack" aria-live="assertive" aria-relevant="additions"></div>
     <details class="admin-section admin-requests" open>
       <summary><span>ग्राहक अनुरोध</span><small>ग्राहक का काम, स्थिति और भुगतान</small></summary>
       <div class="admin-section-body">
@@ -268,6 +286,120 @@ shell.innerHTML = `
   </div>`;
 
 const el = id => document.getElementById(id);
+
+function refreshRequestNotificationControl() {
+  const button = el('enableRequestNotifications');
+  const state = el('requestNotificationState');
+  if (!button || !state) return;
+  if (!window.isSecureContext) {
+    state.textContent = 'सूचना के लिए सुरक्षित HTTPS कनेक्शन जरूरी है।';
+    button.textContent = 'ब्राउज़र सूचना उपलब्ध नहीं';
+    button.disabled = true;
+    return;
+  }
+  if (!('Notification' in window)) {
+    state.textContent = 'यह ब्राउज़र नोटिफिकेशन सपोर्ट नहीं करता।';
+    button.textContent = 'सूचना उपलब्ध नहीं';
+    button.disabled = true;
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    state.textContent = 'ब्राउज़र नोटिफिकेशन चालू हैं';
+    button.textContent = '🔔 सूचनाएँ चालू हैं';
+    button.disabled = true;
+  } else if (Notification.permission === 'denied') {
+    state.textContent = 'ब्राउज़र सेटिंग में Notifications की अनुमति दें।';
+    button.textContent = 'ब्राउज़र अनुमति बंद है';
+    button.disabled = true;
+  } else {
+    state.textContent = 'नया अनुरोध आने पर ब्राउज़र सूचना पाने के लिए अनुमति दें।';
+    button.textContent = '🔔 सूचना चालू करें';
+    button.disabled = false;
+  }
+}
+
+function openRequestCard(requestId) {
+  el('requestSearch').value = '';
+  el('requestDateFrom').value = '';
+  el('requestDateTo').value = '';
+  el('requestStatusFilter').value = 'all';
+  renderAdminRequests();
+  const card = document.getElementById(`request-card-${requestId}`);
+  if (card) {
+    card.open = true;
+    card.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function showNewRequestToast(request) {
+  const stack = el('requestNotificationToast');
+  if (!stack) return;
+  const toast = document.createElement('div');
+  toast.className = 'request-live-toast';
+  const copy = document.createElement('div');
+  copy.className = 'toast-copy';
+  const title = document.createElement('strong');
+  title.textContent = 'नया ग्राहक अनुरोध';
+  const description = document.createElement('small');
+  description.textContent = `${request.name || 'नया ग्राहक'} · ${request.service || 'सेवा की जानकारी उपलब्ध नहीं'}`;
+  copy.append(title, description);
+  const actions = document.createElement('div');
+  actions.className = 'toast-actions';
+  const view = document.createElement('button');
+  view.type = 'button';
+  view.textContent = 'देखें';
+  view.addEventListener('click', () => { openRequestCard(request.id); toast.remove(); });
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'toast-close';
+  close.textContent = '✕';
+  close.setAttribute('aria-label', 'सूचना बंद करें');
+  close.addEventListener('click', () => toast.remove());
+  actions.append(view, close);
+  toast.append(copy, actions);
+  stack.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 12000);
+}
+
+function notifyNewCustomerRequest(request) {
+  showNewRequestToast(request);
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  try {
+    const notification = new Notification('श्रीबालाजी कम्युनिकेशन', {
+      body: `नया अनुरोध: ${request.name || 'नया ग्राहक'}\nसेवा: ${request.service || 'जानकारी उपलब्ध नहीं'}`,
+      tag: `customer-request-${request.id}`,
+      renotify: true
+    });
+    notification.onclick = () => {
+      window.focus();
+      openRequestCard(request.id);
+      notification.close();
+    };
+  } catch (error) {
+    console.warn('Browser notification could not be shown:', error);
+  }
+}
+
+el('enableRequestNotifications').addEventListener('click', async () => {
+  if (!('Notification' in window) || !window.isSecureContext) {
+    refreshRequestNotificationControl();
+    return;
+  }
+  try {
+    const permission = await Notification.requestPermission();
+    refreshRequestNotificationControl();
+    if (permission === 'granted') {
+      const confirmation = new Notification('सूचनाएँ चालू हो गईं', {body:'अब नया ग्राहक अनुरोध आने पर इस ब्राउज़र में सूचना मिलेगी।'});
+      window.setTimeout(() => confirmation.close(), 5000);
+    } else if (permission === 'denied') {
+      alert('ब्राउज़र ने सूचना की अनुमति नहीं दी। वेबसाइट की Browser Settings में Notifications को Allow करें।');
+    }
+  } catch (error) {
+    console.error('Notification permission error:', error);
+    el('requestNotificationState').textContent = 'सूचना अनुमति नहीं मिल सकी। ब्राउज़र सेटिंग जाँचें।';
+  }
+});
+
 function resetFirebaseForm() {
   editingId = null;
   el('firebaseUpdateForm').reset();
@@ -387,7 +519,7 @@ function renderAdminRequests() {
     const paymentClass = r.paymentStatus === 'Paid' ? 'is-paid' : 'is-unpaid';
     const feeValue = Number(r.fee) || 0;
     const paymentSummary = feeValue > 0 ? `${formatINR(feeValue)} · ${paymentLabel}` : paymentLabel;
-    return `<details class="request-card">
+    return `<details class="request-card" id="request-card-${safeId}">
       <summary class="request-card-summary">
         <div class="request-card-main"><div class="request-card-title"><strong>${name}</strong><span class="status-pill ${statusClass}">${escapeHtml(canonicalStatus)}</span></div>
           <div class="request-card-subtitle">${service} <span>·</span> ${phone}</div>
@@ -600,11 +732,29 @@ onAuthStateChanged(auth, user => {
   el('firebaseLoginArea').classList.toggle('hidden', isAdmin);
   el('firebaseAdminArea').classList.toggle('hidden', !isAdmin);
   if (isAdmin) {
-    if (!stopRequestsListener) stopRequestsListener = onSnapshot(requestsRef, snapshot => { requestItems = snapshot.docs.map(d => ({id:d.id, ...d.data()})); renderAdminRequests(); }, error => { console.error('Request list error:', error); el('firebaseRequestItems').textContent = 'अनुरोध लोड नहीं हो सके। Firestore Rules जाँचें।'; });
+    refreshRequestNotificationControl();
+    if (!stopRequestsListener) stopRequestsListener = onSnapshot(requestsRef, snapshot => {
+      if (!snapshot.metadata.fromCache) {
+        if (requestSnapshotInitialized) {
+          snapshot.docChanges().forEach(change => {
+            if (change.type !== 'added') return;
+            const data = change.doc.data();
+            if (data.status && !['नया अनुरोध'].includes(data.status)) return;
+            notifyNewCustomerRequest({id:change.doc.id, ...data});
+          });
+        } else {
+          // Ignore the first server snapshot so existing requests do not trigger false alerts.
+          requestSnapshotInitialized = true;
+        }
+      }
+      requestItems = snapshot.docs.map(d => ({id:d.id, ...d.data()}));
+      renderAdminRequests();
+    }, error => { console.error('Request list error:', error); el('firebaseRequestItems').textContent = 'अनुरोध लोड नहीं हो सके। Firestore Rules जाँचें।'; });
     el('firebaseAdminIdentity').textContent = `लॉगिन: ${user.email || 'Admin'}`;
     renderPublicUpdates();
   } else {
     if (stopRequestsListener) { stopRequestsListener(); stopRequestsListener = null; }
+    requestSnapshotInitialized = false;
     requestItems = [];
   }
   if (!isAdmin && user) {
