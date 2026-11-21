@@ -112,7 +112,15 @@ shell.innerHTML = `
       <div class="admin-actions"><button class="btn" type="submit" id="firebaseSave">अपडेट प्रकाशित करें</button><button class="btn outline hidden" type="button" id="firebaseCancelEdit">एडिट रद्द करें</button></div>
     </form>
     <div class="admin-items"><h3>जोड़े गए अपडेट</h3><div id="firebaseAdminItems"></div></div>
-    <div class="admin-items"><h3>Request Online – ग्राहकों के अनुरोध</h3><p class="empty">ग्राहकों के अनुरोध यहाँ दिखाई देंगे।</p><div id="firebaseRequestItems"></div></div>
+    <div class="admin-items"><h3>Request Online – ग्राहकों के अनुरोध</h3>
+      <div class="request-tools" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0;align-items:end">
+        <div class="field"><label for="requestSearch">नाम / मोबाइल / सेवा खोजें</label><input id="requestSearch" type="search" placeholder="नाम, मोबाइल या सेवा"></div>
+        <div class="field"><label for="requestDateFrom">कब से</label><input id="requestDateFrom" type="date"></div>
+        <div class="field"><label for="requestDateTo">कब तक</label><input id="requestDateTo" type="date"></div>
+        <div class="admin-actions" style="margin:10px 0"><button class="btn outline" type="button" id="clearRequestFilters">फ़िल्टर हटाएँ</button><button class="btn" type="button" id="exportRequestsCsv">Excel / CSV डाउनलोड</button></div>
+      </div>
+      <p id="requestFilterCount" class="empty" aria-live="polite">सभी अनुरोध दिखाए जा रहे हैं।</p><div id="firebaseRequestItems"></div>
+    </div>
   </div>`;
 
 const el = id => document.getElementById(id);
@@ -159,6 +167,17 @@ function renderPublicUpdates() {
 }
 
 
+function getFilteredAdminRequests() {
+  const query = (el('requestSearch')?.value || '').trim().toLocaleLowerCase('hi');
+  const from = el('requestDateFrom')?.value || '';
+  const to = el('requestDateTo')?.value || '';
+  return [...requestItems].filter(r => {
+    const haystack = `${r.name || ''} ${r.phone || ''} ${r.service || ''} ${r.details || ''}`.toLocaleLowerCase('hi');
+    const seconds = r.createdAt?.seconds || 0;
+    const day = seconds ? new Date(seconds * 1000).toLocaleDateString('en-CA') : '';
+    return (!query || haystack.includes(query)) && (!from || (day && day >= from)) && (!to || (day && day <= to));
+  }).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+}
 function renderAdminRequests() {
   const host = el('firebaseRequestItems');
   if (!host) return;
@@ -170,15 +189,32 @@ function renderAdminRequests() {
   el('statNewRequests').textContent = newCount;
   el('statPendingRequests').textContent = pendingCount;
   el('statCompletedRequests').textContent = completedCount;
-  const sorted = [...requestItems].sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  const sorted = getFilteredAdminRequests();
+  el('requestFilterCount').textContent = `${sorted.length} / ${requestItems.length} अनुरोध दिखाए जा रहे हैं।`;
   host.innerHTML = sorted.length ? sorted.map(r => {
     const phoneDigits = String(r.phone || '').replace(/\D/g, '');
     const whatsappMessage = `नमस्ते ${r.name || ''} जी, आपने श्रीबालाजी कम्युनिकेशन की वेबसाइट पर ${r.service || 'सेवा'} के लिए अनुरोध भेजा था। कृपया बताएं कि हम आपकी कैसे सहायता कर सकते हैं।`;
     const whatsappLink = /^[6-9]\d{9}$/.test(phoneDigits)
       ? `<a class="btn" href="https://wa.me/91${phoneDigits}?text=${encodeURIComponent(whatsappMessage)}" target="_blank" rel="noopener noreferrer">WhatsApp पर संपर्क करें</a>`
       : '';
-    return `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
-  }).join('') : '<p class="empty">अभी कोई अनुरोध नहीं आया है।</p>';
+    const created = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleString('hi-IN') : 'तारीख उपलब्ध नहीं';
+    return `<div class="admin-item request-item"><div><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')} · ${escapeHtml(created)}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p></div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
+  }).join('') : '<p class="empty">इस खोज या तारीख में कोई अनुरोध नहीं मिला।</p>';
+}
+function exportAdminRequestsCsv() {
+  const rows = getFilteredAdminRequests();
+  if (!rows.length) { alert('डाउनलोड करने के लिए कोई अनुरोध नहीं है।'); return; }
+  const safe = value => {
+    let v = String(value ?? '').replace(/[\r\n]+/g, ' ').trim();
+    if (/^[=+\-@]/.test(v)) v = "'" + v;
+    return `"${v.replace(/"/g, '""')}"`;
+  };
+  const data = [['नाम','मोबाइल','सेवा','विवरण','स्थिति','तारीख'], ...rows.map(r => [r.name,r.phone,r.service,r.details,r.status,r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toLocaleString('en-IN') : ''])];
+  const csv = '\uFEFF' + data.map(row => row.map(safe).join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `shri-balaji-service-requests-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
 el('onlineRequestForm').addEventListener('submit', async event => {
@@ -197,6 +233,10 @@ el('onlineRequestForm').addEventListener('submit', async event => {
     el('requestMessage').textContent = 'अनुरोध अभी जमा नहीं हुआ। कृपया WhatsApp पर संपर्क करें: 7089748108';
   } finally { btn.disabled = false; }
 });
+
+['requestSearch','requestDateFrom','requestDateTo'].forEach(id => el(id).addEventListener(id === 'requestSearch' ? 'input' : 'change', renderAdminRequests));
+el('clearRequestFilters').addEventListener('click', () => { el('requestSearch').value = ''; el('requestDateFrom').value = ''; el('requestDateTo').value = ''; renderAdminRequests(); });
+el('exportRequestsCsv').addEventListener('click', exportAdminRequestsCsv);
 
 el('firebaseRequestItems').addEventListener('click', async event => {
   const doneId = event.target.dataset.requestDone;
