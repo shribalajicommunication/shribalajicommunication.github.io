@@ -201,7 +201,7 @@ function getMonthKeyFromTimestamp(value) {
 function renderRevenueReport() {
   const month = el('revenueMonth')?.value || new Date().toISOString().slice(0,7);
   const monthRequests = requestItems.filter(r => getMonthKeyFromTimestamp(r.createdAt) === month);
-  const monthCompleted = monthRequests.filter(r => r.status === 'पूरा हुआ').length;
+  const monthCompleted = monthRequests.filter(r => r.status === 'आवेदन पूरा हुआ').length;
   const paidThisMonth = requestItems.filter(r => r.paymentStatus === 'Paid' && getMonthKeyFromTimestamp(r.paidAt) === month);
   const pendingThisMonth = monthRequests.filter(r => r.paymentStatus !== 'Paid');
   const paidTotal = paidThisMonth.reduce((sum,r)=>sum+(Number(r.fee)||0),0);
@@ -216,7 +216,7 @@ function renderAdminRequests() {
   const host = el('firebaseRequestItems');
   if (!host) return;
   const nowSeconds = Date.now() / 1000;
-  const completedCount = requestItems.filter(r => r.status === 'पूरा हुआ').length;
+  const completedCount = requestItems.filter(r => r.status === 'आवेदन पूरा हुआ').length;
   const pendingCount = requestItems.length - completedCount;
   const newCount = requestItems.filter(r => r.createdAt?.seconds && nowSeconds - r.createdAt.seconds <= 24 * 60 * 60).length;
   el('statTotalRequests').textContent = requestItems.length;
@@ -236,7 +236,7 @@ function renderAdminRequests() {
     const paidDate = r.paidAt?.seconds ? new Date(r.paidAt.seconds * 1000).toLocaleDateString('en-CA') : (r.paidAt || '');
     return `<div class="admin-item request-item"><div style="flex:1;min-width:240px"><b>${escapeHtml(r.name || '')}</b> · ${escapeHtml(r.phone || '')}<br><small>${escapeHtml(r.service || '')} · ${escapeHtml(r.status || 'नया अनुरोध')} · ${escapeHtml(created)}</small><p style="margin:6px 0;color:#667085;font-size:13px">${escapeHtml(r.details || 'कोई अतिरिक्त जानकारी नहीं')}</p>
       <div class="revenue-edit">
-        <div><label for="job-status-${escapeHtml(r.id)}">काम की स्थिति</label><select id="job-status-${escapeHtml(r.id)}"><option ${r.status === 'नया अनुरोध' || !r.status ? 'selected' : ''}>नया अनुरोध</option><option ${r.status === 'प्रक्रिया में' ? 'selected' : ''}>प्रक्रिया में</option><option ${r.status === 'दस्तावेज़ की कमी' ? 'selected' : ''}>दस्तावेज़ की कमी</option><option ${r.status === 'पूरा हुआ' ? 'selected' : ''}>पूरा हुआ</option></select></div>
+        <div><label for="job-status-${escapeHtml(r.id)}">काम की स्थिति</label><select id="job-status-${escapeHtml(r.id)}"><option ${(!r.status || r.status === 'नया अनुरोध') ? 'selected' : ''}>नया अनुरोध</option><option ${['आवेदन प्रक्रिया में है','प्रक्रिया में','दस्तावेज़ की कमी'].includes(r.status) ? 'selected' : ''}>आवेदन प्रक्रिया में है</option><option ${['आवेदन पूरा हुआ','पूरा हुआ'].includes(r.status) ? 'selected' : ''}>आवेदन पूरा हुआ</option></select></div>
         <div><label for="fee-${escapeHtml(r.id)}">सेवा शुल्क (₹)</label><input id="fee-${escapeHtml(r.id)}" type="number" min="0" step="1" value="${Number(r.fee)||0}" placeholder="जैसे 200"></div>
         <div><label for="payment-${escapeHtml(r.id)}">भुगतान स्थिति</label><select id="payment-${escapeHtml(r.id)}"><option value="Pending" ${r.paymentStatus !== 'Paid' ? 'selected' : ''}>Pending</option><option value="Paid" ${r.paymentStatus === 'Paid' ? 'selected' : ''}>Paid</option></select></div>
         <div><label for="paid-date-${escapeHtml(r.id)}">भुगतान तारीख</label><input id="paid-date-${escapeHtml(r.id)}" type="date" value="${escapeHtml(paidDate)}"></div>
@@ -244,7 +244,7 @@ function renderAdminRequests() {
       <button class="btn outline revenue-save" type="button" data-status-save="${escapeHtml(r.id)}">काम की स्थिति सेव करें</button>
       <button class="btn outline revenue-save" type="button" data-payment-save="${escapeHtml(r.id)}">शुल्क / भुगतान सेव करें</button>
       ${r.paymentStatus === 'Paid' ? `<small style="display:block;color:#067647;margin-top:5px">✓ भुगतान प्राप्त: ${formatINR(r.fee)}</small><button class="btn receipt-btn" type="button" data-payment-receipt="${escapeHtml(r.id)}">रसीद प्रिंट / PDF</button>` : `<small style="display:block;color:#b54708;margin-top:5px">भुगतान बाकी: ${formatINR(r.fee)}</small>`}
-      </div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
+      </div><div class="admin-actions">${whatsappLink}<button class="btn outline" type="button" data-request-done="${escapeHtml(r.id)}">${r.status === 'आवेदन पूरा हुआ' ? 'फिर से नया' : 'पूरा हुआ'}</button><button class="btn danger" type="button" data-request-delete="${escapeHtml(r.id)}">हटाएँ</button></div></div>`;
   }).join('') : '<p class="empty">इस खोज या तारीख में कोई अनुरोध नहीं मिला।</p>';
 }
 function exportAdminRequestsCsv() {
@@ -291,9 +291,12 @@ el('trackingLookupForm').addEventListener('submit', async event => {
   try {
     const snap = await getDoc(doc(db, 'publicTracking', code));
     if (!snap.exists()) { message.textContent = 'यह Tracking Number नहीं मिला। कृपया नंबर जाँचकर दोबारा प्रयास करें।'; return; }
-    const data = snap.data(); const statuses = ['नया अनुरोध','प्रक्रिया में','दस्तावेज़ की कमी','पूरा हुआ']; const currentIndex = statuses.indexOf(data.status);
-    const labels = {'नया अनुरोध':'आपका अनुरोध प्राप्त हो गया है।','प्रक्रिया में':'आपके काम पर प्रक्रिया चल रही है।','दस्तावेज़ की कमी':'काम आगे बढ़ाने के लिए अतिरिक्त दस्तावेज़ आवश्यक हैं।','पूरा हुआ':'आपका काम पूरा हो गया है।'};
-    result.innerHTML = `<b>Tracking Number:</b> <span class="tracking-code">${escapeHtml(code)}</span><br><b>सेवा:</b> ${escapeHtml(data.service || '—')}<br><b>वर्तमान स्थिति:</b> <strong>${escapeHtml(data.status || 'जानकारी उपलब्ध नहीं')}</strong><p style="margin:8px 0 0">${escapeHtml(labels[data.status] || '')}</p><div class="tracking-timeline">${statuses.map((status,i)=>`<div class="tracking-step ${i <= currentIndex ? 'active' : ''}">${i <= currentIndex ? '✓' : '○'} ${escapeHtml(status)}</div>`).join('')}</div>`;
+    const data = snap.data(); const statuses = ['नया अनुरोध','आवेदन प्रक्रिया में है','आवेदन पूरा हुआ'];
+    const legacyStatus = data.status || 'नया अनुरोध';
+    const displayStatus = legacyStatus === 'पूरा हुआ' ? 'आवेदन पूरा हुआ' : (['प्रक्रिया में','दस्तावेज़ की कमी'].includes(legacyStatus) ? 'आवेदन प्रक्रिया में है' : legacyStatus);
+    const currentIndex = statuses.indexOf(displayStatus);
+    const labels = {'नया अनुरोध':'आपका अनुरोध प्राप्त हो गया है।','आवेदन प्रक्रिया में है':'आपके आवेदन पर प्रक्रिया चल रही है।','आवेदन पूरा हुआ':'आपका आवेदन पूरा हो गया है।'};
+    result.innerHTML = `<b>Tracking Number:</b> <span class="tracking-code">${escapeHtml(code)}</span><br><b>सेवा:</b> ${escapeHtml(data.service || '—')}<br><b>वर्तमान स्थिति:</b> <strong>${escapeHtml(displayStatus || 'जानकारी उपलब्ध नहीं')}</strong><p style="margin:8px 0 0">${escapeHtml(labels[displayStatus] || '')}</p><div class="tracking-timeline">${statuses.map((status,i)=>`<div class="tracking-step ${i <= currentIndex ? 'active' : ''}">${i <= currentIndex ? '✓' : '○'} ${escapeHtml(status)}</div>`).join('')}</div>`;
     result.classList.remove('hidden'); message.textContent = '';
   } catch (error) { console.error('Tracking lookup error:', error); message.textContent = 'स्टेटस अभी नहीं मिल सका। कृपया कुछ देर बाद प्रयास करें।'; }
   finally { button.disabled = false; }
@@ -390,7 +393,7 @@ el('firebaseRequestItems').addEventListener('click', async event => {
 
   if (doneId) {
     const current = requestItems.find(x => x.id === doneId);
-    if (current) try { const nextStatus = current.status === 'पूरा हुआ' ? 'नया अनुरोध' : 'पूरा हुआ'; await updateDoc(doc(db, 'serviceRequests', doneId), {status:nextStatus, statusUpdatedAt:serverTimestamp()}); if (current.trackingCode) await updateDoc(doc(db, 'publicTracking', current.trackingCode), {status:nextStatus, updatedAt:serverTimestamp()}); }
+    if (current) try { const nextStatus = (current.status === 'आवेदन पूरा हुआ' || current.status === 'पूरा हुआ') ? 'नया अनुरोध' : 'आवेदन पूरा हुआ'; await updateDoc(doc(db, 'serviceRequests', doneId), {status:nextStatus, statusUpdatedAt:serverTimestamp()}); if (current.trackingCode) await updateDoc(doc(db, 'publicTracking', current.trackingCode), {status:nextStatus, updatedAt:serverTimestamp()}); }
     catch (error) { console.error(error); alert('अनुरोध की स्थिति अपडेट नहीं हुई।'); }
   }
   if (deleteId && confirm('क्या आप यह ग्राहक अनुरोध हटाना चाहते हैं?')) {
