@@ -285,8 +285,52 @@ el('revenueMonth').value = new Date().toISOString().slice(0,7);
 el('revenueMonth').addEventListener('change', renderRevenueReport);
 
 el('firebaseRequestItems').addEventListener('click', async event => {
-  const doneId = event.target.dataset.requestDone;
-  const deleteId = event.target.dataset.requestDelete;
+  const saveButton = event.target.closest('[data-payment-save]');
+  const paymentId = saveButton?.dataset.paymentSave;
+  const doneId = event.target.closest('[data-request-done]')?.dataset.requestDone;
+  const deleteId = event.target.closest('[data-request-delete]')?.dataset.requestDelete;
+
+  if (paymentId) {
+    if (auth.currentUser?.uid !== ADMIN_UID) {
+      alert('केवल Admin ही भुगतान रिकॉर्ड सेव कर सकता है।');
+      return;
+    }
+    const feeInput = el(`fee-${paymentId}`);
+    const statusInput = el(`payment-${paymentId}`);
+    const dateInput = el(`paid-date-${paymentId}`);
+    const fee = Number(feeInput?.value);
+    const paymentStatus = statusInput?.value;
+    const paidDate = dateInput?.value || '';
+
+    if (!Number.isFinite(fee) || fee < 0) {
+      alert('कृपया सही सेवा शुल्क दर्ज करें।');
+      feeInput?.focus();
+      return;
+    }
+    if (paymentStatus === 'Paid' && !paidDate) {
+      alert('Paid चुनने पर भुगतान तारीख दर्ज करें।');
+      dateInput?.focus();
+      return;
+    }
+
+    saveButton.disabled = true;
+    saveButton.textContent = 'सेव हो रहा है…';
+    try {
+      await updateDoc(doc(db, 'serviceRequests', paymentId), {
+        fee,
+        paymentStatus,
+        paidAt: paymentStatus === 'Paid' ? paidDate : null
+      });
+      saveButton.textContent = 'सेव हो गया ✓';
+    } catch (error) {
+      console.error('Payment record save error:', error);
+      alert(`शुल्क / भुगतान सेव नहीं हुआ: ${error.code || error.message || 'Firestore error'}\nFirestore Rules में serviceRequests पर update अनुमति जाँचें।`);
+      saveButton.disabled = false;
+      saveButton.textContent = 'शुल्क / भुगतान सेव करें';
+    }
+    return;
+  }
+
   if (doneId) {
     const current = requestItems.find(x => x.id === doneId);
     if (current) try { await updateDoc(doc(db, 'serviceRequests', doneId), {status: current.status === 'पूरा हुआ' ? 'नया अनुरोध' : 'पूरा हुआ'}); }
