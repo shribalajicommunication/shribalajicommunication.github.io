@@ -11,6 +11,26 @@
 @media(max-width:1000px){.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.store-nav{align-items:flex-start}.brand b{font-size:15px}.nav-actions .btn{padding:8px 9px;font-size:11px}.hero{align-items:flex-start}.hero-badge{display:none}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-image{height:140px}.product-body{padding:10px}.product-body h3{font-size:13px}.product-desc{font-size:11px}.price{font-size:16px}.container{padding-top:18px}.checkout-grid,.admin-form{grid-template-columns:1fr}.field.full,.admin-form .full{grid-column:auto}}
 @media(max-width:420px){.store-top{font-size:10px}.brand-mark{width:36px;height:36px}.brand small{font-size:9px}.product-image{height:120px}.cart-panel{padding:13px;margin:6px auto}.overlay{padding:7px}.cart-line{grid-template-columns:1fr auto}.cart-line>strong{grid-column:2}.qty{grid-column:1/2;grid-row:2}}
+
+/* स्पष्ट भुगतान विवरण: Admin Order Cards */
+.order-admin-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(230px,1fr);gap:16px;padding:14px}
+.order-admin-main{min-width:0;flex:1}
+.order-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.order-state-pill{display:inline-flex;align-items:center;border-radius:999px;background:#eef2ff;color:#344054;padding:4px 9px;font-size:11px;font-weight:800}
+.order-payment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.order-info-box{border:1px solid var(--line);border-radius:9px;background:#fafbfc;padding:8px 10px;min-width:0}
+.order-info-box span,.order-control span{display:block;color:var(--muted);font-size:10px;font-weight:750;margin-bottom:4px}
+.order-info-box strong{display:block;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.payment-state.paid{color:var(--green)}
+.payment-state.pending{color:#b54708}
+.order-whatsapp{margin-top:2px;padding:7px 11px;font-size:11px}
+.order-controls{min-width:220px;align-content:start;display:grid;grid-template-columns:1fr;gap:8px}
+.order-control{display:block;min-width:0}
+.order-control select{width:100%;max-width:100%;background:#fff}
+.order-controls>.btn{justify-self:start;padding:7px 14px;font-size:12px}
+@media(max-width:760px){.order-admin-card{grid-template-columns:1fr}.order-controls{min-width:0;grid-template-columns:1fr 1fr}.order-controls>.btn{grid-column:1/-1}}
+@media(max-width:430px){.order-payment-grid{grid-template-columns:1fr}.order-controls{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -97,7 +117,34 @@ function showNotice(message){$('storeLoginMessage').textContent=message;}
 async function uploadStoreImage(file){if(!file)return '';if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024)throw new Error('फोटो JPG, PNG या WEBP हो और 5 MB से कम हो।');const form=new FormData();form.append('file',file);form.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:'POST',body:form});const data=await res.json();if(!res.ok||!data.secure_url)throw new Error(data.error?.message||'फोटो अपलोड नहीं हुई।');return data.secure_url;}
 function resetProductForm(){editingProductId=null;$('productForm').reset();$('pStock').value='1';$('pActive').checked=true;$('saveProduct').textContent='प्रोडक्ट सेव करें';$('cancelProductEdit').classList.add('hidden');$('pImageInfo').textContent='फोटो वैकल्पिक है। नई फोटो नहीं चुनने पर एडिट करते समय पुरानी फोटो बनी रहेगी।';}
 function renderAdminProducts(){$('adminProducts').innerHTML=adminProducts.length?adminProducts.map(p=>`<div class="admin-row"><div><b>${esc(p.name)}</b><small>${esc(p.category)} · ${money(p.price)} · स्टॉक ${Number(p.stock)||0} · ${p.active?'वेबसाइट पर दिख रहा है':'छिपा हुआ'}</small></div><div class="admin-row-actions"><button class="btn secondary" data-edit-product="${esc(p.id)}" type="button">एडिट</button><button class="btn secondary" data-toggle-product="${esc(p.id)}" type="button">${p.active?'छिपाएँ':'दिखाएँ'}</button><button class="btn secondary" data-delete-product="${esc(p.id)}" type="button">हटाएँ</button></div></div>`).join(''):'<div class="empty">अभी कोई प्रोडक्ट नहीं जोड़ा गया है।</div>';}
-function renderAdminOrders(){$('adminOrders').innerHTML=adminOrders.length?adminOrders.map(o=>{const itemText=(o.items||[]).map(i=>`${esc(i.name)} × ${Number(i.quantity)||1}`).join(' · ');return `<div class="admin-row" style="align-items:flex-start"><div style="min-width:220px;flex:1"><b>${esc(o.orderNumber||o.id)}</b><small>${esc(o.customerName)} · ${esc(o.customerPhone)}<br>${itemText}<br>कुल: <b>${money(o.total)}</b> · ${o.deliveryMode==='DELIVERY'?'Courier Delivery':'अन्य'}<br>${o.paymentMethod==='UPI'?'UPI':'Cash on Delivery अनुरोध'} · ${esc(o.customerAddress||'पता नहीं दिया')}</small><a href="https://wa.me/91${encodeURIComponent(o.customerPhone||'')}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।')}" target="_blank" rel="noopener" class="btn secondary" style="margin-top:7px">WhatsApp</a></div><div class="admin-row-actions"><select data-order-status="${esc(o.id)}"><option ${o.orderStatus==='नया ऑर्डर'?'selected':''}>नया ऑर्डर</option><option ${o.orderStatus==='ऑर्डर कन्फर्म'?'selected':''}>ऑर्डर कन्फर्म</option><option ${o.orderStatus==='पैकिंग'?'selected':''}>पैकिंग</option><option ${o.orderStatus==='भेज दिया गया'?'selected':''}>भेज दिया गया</option><option ${o.orderStatus==='डिलीवर'?'selected':''}>डिलीवर</option><option ${o.orderStatus==='रद्द'?'selected':''}>रद्द</option></select><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>भुगतान बाकी</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>भुगतान प्राप्त</option></select><button class="btn" data-save-order="${esc(o.id)}" type="button">सेव</button></div></div>`;}).join(''):'<div class="empty">अभी कोई ऑर्डर नहीं आया है।</div>';}
+function renderAdminOrders(){
+  $('adminOrders').innerHTML=adminOrders.length?adminOrders.map(o=>{
+    const itemText=(o.items||[]).map(i=>`${esc(i.name)} × ${Number(i.quantity)||1}`).join(' · ');
+    const isUpi=o.paymentMethod==='UPI';
+    const methodLabel=isUpi?'UPI Online':'Cash on Delivery (COD)';
+    const pendingLabel=isUpi?'UPI भुगतान की पुष्टि बाकी':'COD — डिलीवरी पर भुगतान बाकी';
+    const receivedLabel=isUpi?'UPI भुगतान प्राप्त':'COD — भुगतान प्राप्त';
+    const paymentLabel=o.paymentStatus==='भुगतान प्राप्त'?receivedLabel:pendingLabel;
+    const paymentTone=o.paymentStatus==='भुगतान प्राप्त'?'paid':'pending';
+    const orderStatusOptions=['नया ऑर्डर','ऑर्डर कन्फर्म','पैकिंग','भेज दिया गया','डिलीवर','रद्द'];
+    return `<div class="admin-row order-admin-card" style="align-items:flex-start">
+      <div class="order-admin-main">
+        <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill">${esc(o.orderStatus||'नया ऑर्डर')}</span></div>
+        <small>${esc(o.customerName)} · ${esc(o.customerPhone)}<br>${itemText}<br>सामान की राशि: <b>${money(o.total)}</b><br>डिलीवरी: <b>Courier Delivery</b><br>पता: ${esc(o.customerAddress||'पता नहीं दिया')}</small>
+        <div class="order-payment-grid">
+          <div class="order-info-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
+          <div class="order-info-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
+        </div>
+        <a href="https://wa.me/91${encodeURIComponent(o.customerPhone||'')}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।') }" target="_blank" rel="noopener" class="btn secondary order-whatsapp">WhatsApp</a>
+      </div>
+      <div class="admin-row-actions order-controls">
+        <label class="order-control"><span>Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option ${o.orderStatus===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label class="order-control"><span>Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
+        <button class="btn" data-save-order="${esc(o.id)}" type="button">Save</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">अभी कोई ऑर्डर नहीं आया है।</div>';
+}
 function startStoreAdmin(){ if(auth.currentUser?.uid!==ADMIN_UID)return; $('adminLoginArea').classList.add('hidden');$('storeAdminArea').classList.add('show');$('adminIdentity').textContent=auth.currentUser?.email||'Authorized Admin';if(adminListenersStarted)return;adminListenersStarted=true;stopAdminProducts=onSnapshot(productsRef,snap=>{adminProducts=snap.docs.map(d=>({id:d.id,...d.data()}));renderAdminProducts();},e=>{$('adminProducts').textContent='प्रोडक्ट लोड नहीं हुए: '+esc(e.message);});stopAdminOrders=onSnapshot(ordersRef,snap=>{adminOrders=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderAdminOrders();},e=>{$('adminOrders').textContent='ऑर्डर लोड नहीं हुए: '+esc(e.message);});}
 function maybeShowAdminRoute(){if(new URLSearchParams(location.search).get('admin')==='1'){if(auth.currentUser?.uid===ADMIN_UID)startStoreAdmin();else $('adminLoginArea').classList.add('show');}}
 $('productSearch').addEventListener('input',renderProducts);
