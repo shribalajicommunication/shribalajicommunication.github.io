@@ -186,6 +186,7 @@ const firebaseConfig = {
   appId: '1:248414940916:web:bb273d296281c211ee78a1'
 };
 const ADMIN_UID = 'NZAAy9G9QCfHlwsuVhYTqkUwil62';
+const STORE_ADMIN_UID = 'rNNvLoiQL3VthmtwYa5jV8Po5AU2';
 const CLOUDINARY_CLOUD_NAME = 'rctadrxy';
 const CLOUDINARY_UPLOAD_PRESET = 'shri_balaji_posters';
 const app = initializeApp(firebaseConfig);
@@ -784,7 +785,11 @@ onAuthStateChanged(auth, user => {
     requestSnapshotInitialized = false;
     requestItems = [];
   }
-  if (!isAdmin && user) {
+  if (!isAdmin && user?.uid === STORE_ADMIN_UID) {
+    // Store Admin is authenticated for store.html only. Keep this session alive,
+    // but never expose the main website Admin Panel to this account.
+    el('firebaseLoginMessage').textContent = 'यह अकाउंट केवल Online Store Management के लिए है। Main Website Admin Panel की अनुमति नहीं है।';
+  } else if (!isAdmin && user) {
     el('firebaseLoginMessage').textContent = 'इस अकाउंट को Admin अनुमति नहीं है।';
     signOut(auth);
   }
