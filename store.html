@@ -32,6 +32,10 @@
 @media(max-width:430px){.order-payment-grid{grid-template-columns:1fr}.order-controls{grid-template-columns:1fr}}
 .order-track-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:32px 0 10px;box-shadow:var(--shadow);scroll-margin-top:100px}
 .order-track-box h2{margin:8px 0 5px;font-size:22px}.track-form{display:grid;grid-template-columns:1.2fr 1fr auto;align-items:end;gap:12px;margin-top:12px}.track-form .field{margin:0}.track-form .btn{height:40px;white-space:nowrap}.track-result{margin-top:12px}.track-result:empty{display:none}.track-result-card{border:1px solid #b7e4c7;background:#f6fef9;border-radius:12px;padding:13px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.track-result-card .track-cell{background:#fff;border:1px solid #e4eee8;border-radius:9px;padding:9px;min-width:0}.track-result-card small{display:block;color:var(--muted);font-size:10px;font-weight:750;margin-bottom:4px}.track-result-card b{display:block;font-size:13px;overflow-wrap:anywhere}.track-help{font-size:12px;color:var(--muted);margin:9px 0 0;line-height:1.5}.courier-admin-fields{border-top:1px solid var(--line);padding-top:9px;margin-top:9px;display:grid;gap:7px}.courier-admin-fields .courier-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.courier-admin-fields label{display:grid;gap:4px;font-size:10px;color:var(--muted);font-weight:750}.courier-admin-fields input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;color:var(--ink);background:#fff}.courier-admin-fields .btn{justify-self:start;padding:7px 12px;font-size:11px}
+.courier-admin-fields .courier-save-primary{justify-self:start;width:100%;max-width:280px;min-height:40px;padding:9px 16px;background:#e87519;color:#fff;border:1px solid #c65b0c;border-radius:10px;font-size:12px;font-weight:850;letter-spacing:.15px;box-shadow:0 5px 14px rgba(232,117,25,.30);transition:background .15s ease,transform .15s ease,box-shadow .15s ease}
+.courier-admin-fields .courier-save-primary:hover{background:#c65b0c;box-shadow:0 7px 17px rgba(198,91,12,.32);transform:translateY(-1px)}
+.courier-admin-fields .courier-save-primary:focus-visible{outline:3px solid #f9b77e;outline-offset:2px}
+.courier-admin-fields .courier-save-primary:disabled{opacity:.65;transform:none;box-shadow:none}
 @media(max-width:760px){.track-form{grid-template-columns:1fr 1fr}.track-form .btn{grid-column:1/-1}.track-result-card{grid-template-columns:1fr 1fr}}
 @media(max-width:430px){.order-track-box{padding:14px}.track-form,.track-result-card,.courier-admin-fields .courier-grid{grid-template-columns:1fr}}
 
@@ -96,7 +100,7 @@
       <div class="order-tools">
         <input id="orderSearch" type="search" placeholder="Order Number, ग्राहक, मोबाइल या प्रोडक्ट खोजें…" aria-label="ऑर्डर खोजें">
         <select id="orderStatusFilter" aria-label="ऑर्डर स्थिति फ़िल्टर">
-          <option value="ALL">सभी Order Status</option><option>नया ऑर्डर</option><option>ऑर्डर कन्फर्म</option><option>पैकिंग</option><option>भेज दिया गया</option><option>डिलीवर</option><option>रद्द</option>
+          <option value="ALL">All Order Status</option><option value="नया ऑर्डर">New Order</option><option value="ऑर्डर कन्फर्म">Order Confirmed</option><option value="पैकिंग">Packing</option><option value="भेज दिया गया">Dispatched</option><option value="डिलीवर">Delivered</option><option value="रद्द">Cancelled</option>
         </select>
         <select id="orderPaymentFilter" aria-label="भुगतान स्थिति फ़िल्टर">
           <option value="ALL">सभी Payment Status</option><option value="भुगतान पुष्टि बाकी">भुगतान बाकी</option><option value="भुगतान प्राप्त">भुगतान प्राप्त</option>
@@ -152,6 +156,15 @@ async function makeOrderTrackingKey(orderNumber,phone){
   const digest=await crypto.subtle.digest('SHA-256',bytes);
   return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
 }
+const ORDER_STATUS_LABELS={
+  'नया ऑर्डर':'New Order',
+  'ऑर्डर कन्फर्म':'Order Confirmed',
+  'पैकिंग':'Packing',
+  'भेज दिया गया':'Dispatched',
+  'डिलीवर':'Delivered',
+  'रद्द':'Cancelled'
+};
+const orderStatusLabel=status=>ORDER_STATUS_LABELS[status]||status||'New Order';
 const cats=['Computer Accessories','Storage Devices','Printer & Supplies','Networking','Power & UPS','Other Electronics'];
 const icons={'Computer Accessories':'⌨️','Storage Devices':'💾','Printer & Supplies':'🖨️','Networking':'📶','Power & UPS':'🔋','Other Electronics':'🎧'};
 let products=[],cart=JSON.parse(localStorage.getItem('sbc_store_cart_v1')||'[]'),activeCategory='All',editingProductId=null,adminProducts=[],adminOrders=[],adminListenersStarted=false,stopAdminProducts=null,stopAdminOrders=null;
@@ -206,7 +219,7 @@ function renderAdminOrders(){
     const orderStatusOptions=['नया ऑर्डर','ऑर्डर कन्फर्म','पैकिंग','भेज दिया गया','डिलीवर','रद्द'];
     return `<div class="admin-row order-admin-card" style="align-items:flex-start">
       <div class="order-admin-main">
-        <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill">${esc(o.orderStatus||'नया ऑर्डर')}</span></div>
+        <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill">${esc(orderStatusLabel(o.orderStatus||'नया ऑर्डर'))}</span></div>
         <small>${esc(o.customerName)} · ${esc(o.customerPhone)}<br>${itemText}<br>सामान की राशि: <b>${money(o.total)}</b><br>डिलीवरी: <b>Courier Delivery</b><br>पता: ${esc(o.customerAddress||'पता नहीं दिया')}</small>
         <div class="order-payment-grid">
           <div class="order-info-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
@@ -215,7 +228,7 @@ function renderAdminOrders(){
         <a href="https://wa.me/91${encodeURIComponent(o.customerPhone||'')}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।') }" target="_blank" rel="noopener" class="btn secondary order-whatsapp">WhatsApp</a>
       </div>
       <div class="admin-row-actions order-controls">
-        <label class="order-control"><span>Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option ${o.orderStatus===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label class="order-control"><span>Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option value="${esc(v)}" ${o.orderStatus===v?'selected':''}>${esc(orderStatusLabel(v))}</option>`).join('')}</select></label>
         <label class="order-control"><span>Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
         <button class="btn" data-save-order="${esc(o.id)}" type="button">Save Order</button>
         <div class="courier-admin-fields">
@@ -225,7 +238,7 @@ function renderAdminOrders(){
             <label>AWB / Tracking Number<input type="text" maxlength="80" data-courier-awb="${esc(o.id)}" value="${esc(o.trackingNumber||'')}" placeholder="Courier AWB Number"></label>
           </div>
           <label>Dispatch Date<input type="date" data-courier-date="${esc(o.id)}" value="${esc(o.dispatchDate||'')}"></label>
-          <button class="btn secondary" data-save-courier="${esc(o.id)}" type="button">Save Courier Details</button>
+          <button class="btn courier-save-primary" data-save-courier="${esc(o.id)}" type="button">Save Courier Details</button>
           <small class="checkout-note">तीनों जानकारी भरने पर ग्राहक Order Number और मोबाइल से Courier विवरण देख सकेगा।</small>
         </div>
       </div>
@@ -346,7 +359,7 @@ $('adminOrders').addEventListener('click',async e=>{
       const batch=writeBatch(db);
       batch.update(doc(db,'storeOrders',id),{courierCompany,trackingNumber,dispatchDate,orderStatus,updatedAt:serverTimestamp()});
       batch.set(doc(orderTrackingRef,key),{orderDocId:id,orderNumber:order.orderNumber,orderStatus,courierCompany,trackingNumber,dispatchDate,updatedAt:serverTimestamp()},{merge:true});
-      await batch.commit();courierButton.textContent='सेव हो गया ✓';
+      await batch.commit();courierButton.textContent='Saved ✓';
     }catch(error){console.error('Courier detail save error:',error);alert('Courier Details सेव नहीं हुए: '+(error.code||error.message||''));courierButton.disabled=false;courierButton.textContent='Save Courier Details';}
     return;
   }
