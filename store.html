@@ -35,6 +35,16 @@
 @media(max-width:760px){.track-form{grid-template-columns:1fr 1fr}.track-form .btn{grid-column:1/-1}.track-result-card{grid-template-columns:1fr 1fr}}
 @media(max-width:430px){.order-track-box{padding:14px}.track-form,.track-result-card,.courier-admin-fields .courier-grid{grid-template-columns:1fr}}
 
+
+.order-dashboard-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:13px 0}
+.order-stat-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-width:0}
+.order-stat-card span{display:block;color:var(--muted);font-size:11px;font-weight:700}
+.order-stat-card strong{display:block;color:var(--ink);font-size:22px;line-height:1.2;margin-top:5px}
+.order-tools{display:grid;grid-template-columns:minmax(210px,1.5fr) repeat(3,minmax(145px,1fr)) auto;gap:8px;align-items:center;margin:12px 0}
+.order-tools input,.order-tools select{width:100%;min-width:0;min-height:36px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+.order-tools .btn{min-height:36px;padding:7px 11px;white-space:nowrap;font-size:12px}
+@media(max-width:950px){.order-dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.order-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.order-tools input{grid-column:1/-1}}
+@media(max-width:520px){.order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.order-tools{grid-template-columns:1fr}.order-tools input{grid-column:auto}.order-tools .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -79,7 +89,26 @@
       </form>
       <h3 style="margin-top:22px">प्रोडक्ट सूची</h3><div id="adminProducts" class="admin-list">लोड हो रहा है…</div>
     </section>
-    <section id="ordersPane" class="admin-pane"><h3>ग्राहक ऑर्डर</h3><p class="checkout-note">नए ऑर्डर यहाँ दिखाई देंगे। भुगतान की पुष्टि UPI ऐप/बैंक में देखकर ही “भुगतान प्राप्त” करें।</p><div id="adminOrders" class="admin-list">ऑर्डर लोड हो रहे हैं…</div></section>
+    <section id="ordersPane" class="admin-pane">
+      <h3>ग्राहक ऑर्डर</h3>
+      <p class="checkout-note">सभी ऑर्डर यहाँ देखें, खोजें और स्थिति के अनुसार फ़िल्टर करें। UPI भुगतान की पुष्टि बैंक/UPI ऐप में देखकर ही करें।</p>
+      <div id="orderStats" class="order-dashboard-stats" aria-live="polite"></div>
+      <div class="order-tools">
+        <input id="orderSearch" type="search" placeholder="Order Number, ग्राहक, मोबाइल या प्रोडक्ट खोजें…" aria-label="ऑर्डर खोजें">
+        <select id="orderStatusFilter" aria-label="ऑर्डर स्थिति फ़िल्टर">
+          <option value="ALL">सभी Order Status</option><option>नया ऑर्डर</option><option>ऑर्डर कन्फर्म</option><option>पैकिंग</option><option>भेज दिया गया</option><option>डिलीवर</option><option>रद्द</option>
+        </select>
+        <select id="orderPaymentFilter" aria-label="भुगतान स्थिति फ़िल्टर">
+          <option value="ALL">सभी Payment Status</option><option value="भुगतान पुष्टि बाकी">भुगतान बाकी</option><option value="भुगतान प्राप्त">भुगतान प्राप्त</option>
+        </select>
+        <select id="orderMethodFilter" aria-label="भुगतान माध्यम फ़िल्टर">
+          <option value="ALL">सभी Payment Method</option><option value="UPI">UPI Online</option><option value="CASH">Cash on Delivery</option>
+        </select>
+        <button class="btn secondary" id="exportOrdersCsv" type="button">Export CSV</button>
+      </div>
+      <p id="orderFilterCount" class="checkout-note" aria-live="polite"></p>
+      <div id="adminOrders" class="admin-list">ऑर्डर लोड हो रहे हैं…</div>
+    </section>
   </section>
   <section id="adminLoginArea" class="admin-area"><h3>Store Admin Login</h3><p class="checkout-note">प्रोडक्ट और ऑर्डर प्रबंधन के लिए अधिकृत Admin लॉगिन करें।</p><form id="storeLoginForm" class="login-box"><div class="field"><label for="storeAdminEmail">ईमेल</label><input id="storeAdminEmail" type="email" required autocomplete="username"></div><div class="field"><label for="storeAdminPassword">पासवर्ड</label><input id="storeAdminPassword" type="password" required autocomplete="current-password"></div><button class="btn" id="storeLoginButton" type="submit">लॉगिन करें</button><p id="storeLoginMessage" role="status"></p></form></section>
 </main>
@@ -140,8 +169,33 @@ function showNotice(message){$('storeLoginMessage').textContent=message;}
 async function uploadStoreImage(file){if(!file)return '';if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024)throw new Error('फोटो JPG, PNG या WEBP हो और 5 MB से कम हो।');const form=new FormData();form.append('file',file);form.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:'POST',body:form});const data=await res.json();if(!res.ok||!data.secure_url)throw new Error(data.error?.message||'फोटो अपलोड नहीं हुई।');return data.secure_url;}
 function resetProductForm(){editingProductId=null;$('productForm').reset();$('pStock').value='1';$('pActive').checked=true;$('saveProduct').textContent='प्रोडक्ट सेव करें';$('cancelProductEdit').classList.add('hidden');$('pImageInfo').textContent='फोटो वैकल्पिक है। नई फोटो नहीं चुनने पर एडिट करते समय पुरानी फोटो बनी रहेगी।';}
 function renderAdminProducts(){$('adminProducts').innerHTML=adminProducts.length?adminProducts.map(p=>`<div class="admin-row"><div><b>${esc(p.name)}</b><small>${esc(p.category)} · ${money(p.price)} · स्टॉक ${Number(p.stock)||0} · ${p.active?'वेबसाइट पर दिख रहा है':'छिपा हुआ'}</small></div><div class="admin-row-actions"><button class="btn secondary" data-edit-product="${esc(p.id)}" type="button">एडिट</button><button class="btn secondary" data-toggle-product="${esc(p.id)}" type="button">${p.active?'छिपाएँ':'दिखाएँ'}</button><button class="btn secondary" data-delete-product="${esc(p.id)}" type="button">हटाएँ</button></div></div>`).join(''):'<div class="empty">अभी कोई प्रोडक्ट नहीं जोड़ा गया है।</div>';}
+function getFilteredAdminOrders(){
+  const term=$('orderSearch').value.trim().toLowerCase();
+  const status=$('orderStatusFilter').value;
+  const payment=$('orderPaymentFilter').value;
+  const method=$('orderMethodFilter').value;
+  return adminOrders.filter(o=>{
+    const itemText=(o.items||[]).map(i=>i.name||'').join(' ');
+    const searchable=[o.orderNumber,o.customerName,o.customerPhone,o.customerAddress,itemText,o.courierCompany,o.trackingNumber].join(' ').toLowerCase();
+    return (!term||searchable.includes(term))
+      && (status==='ALL'||(o.orderStatus||'नया ऑर्डर')===status)
+      && (payment==='ALL'||(o.paymentStatus||'भुगतान पुष्टि बाकी')===payment)
+      && (method==='ALL'||(o.paymentMethod||'CASH')===method);
+  });
+}
+function renderOrderStats(){
+  const total=adminOrders.length;
+  const fresh=adminOrders.filter(o=>(o.orderStatus||'नया ऑर्डर')==='नया ऑर्डर').length;
+  const pending=adminOrders.filter(o=>o.paymentStatus!=='भुगतान प्राप्त').length;
+  const dispatched=adminOrders.filter(o=>(o.orderStatus||'')==='भेज दिया गया').length;
+  const delivered=adminOrders.filter(o=>(o.orderStatus||'')==='डिलीवर').length;
+  $('orderStats').innerHTML=[['Total Orders',total],['New Orders',fresh],['Payment Pending',pending],['Dispatched',dispatched],['Delivered',delivered]].map(([label,value])=>`<div class="order-stat-card"><span>${label}</span><strong>${value}</strong></div>`).join('');
+}
 function renderAdminOrders(){
-  $('adminOrders').innerHTML=adminOrders.length?adminOrders.map(o=>{
+  renderOrderStats();
+  const visible=getFilteredAdminOrders();
+  $('orderFilterCount').textContent=`${visible.length} / ${adminOrders.length} ऑर्डर दिखाए जा रहे हैं।`;
+  $('adminOrders').innerHTML=visible.length?visible.map(o=>{
     const itemText=(o.items||[]).map(i=>`${esc(i.name)} × ${Number(i.quantity)||1}`).join(' · ');
     const isUpi=o.paymentMethod==='UPI';
     const methodLabel=isUpi?'UPI Online':'Cash on Delivery (COD)';
@@ -176,8 +230,26 @@ function renderAdminOrders(){
         </div>
       </div>
     </div>`;
-  }).join(''):'<div class="empty">अभी कोई ऑर्डर नहीं आया है।</div>';
+  }).join(''):'<div class="empty">इस फ़िल्टर से कोई ऑर्डर नहीं मिला। फ़िल्टर बदलकर देखें।</div>';
 }
+function exportFilteredOrdersCsv(){
+  const rows=getFilteredAdminOrders();
+  if(!rows.length){alert('डाउनलोड करने के लिए कोई ऑर्डर नहीं है।');return;}
+  const headers=['Order Number','Order Date','Customer Name','Mobile','Delivery Address','Products','Amount (INR)','Payment Method','Payment Status','Order Status','Courier Company','AWB / Tracking Number','Dispatch Date'];
+  const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const data=rows.map(o=>[
+    o.orderNumber||o.id,
+    o.createdAt?.seconds?new Date(o.createdAt.seconds*1000).toLocaleString('en-IN'):'',
+    o.customerName||'',o.customerPhone||'',o.customerAddress||'',
+    (o.items||[]).map(i=>`${i.name||''} x ${Number(i.quantity)||1}`).join('; '),
+    Number(o.total)||0,o.paymentMethod==='UPI'?'UPI Online':'Cash on Delivery',
+    o.paymentStatus||'भुगतान पुष्टि बाकी',o.orderStatus||'नया ऑर्डर',o.courierCompany||'',o.trackingNumber||'',o.dispatchDate||''
+  ]);
+  const csv='\uFEFF'+[headers,...data].map(row=>row.map(quote).join(',')).join('\r\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  const a=document.createElement('a');a.href=url;a.download=`shri-balaji-store-orders-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+
 function startStoreAdmin(){ if(auth.currentUser?.uid!==ADMIN_UID)return; $('adminLoginArea').classList.add('hidden');$('storeAdminArea').classList.add('show');$('adminIdentity').textContent=auth.currentUser?.email||'Authorized Admin';if(adminListenersStarted)return;adminListenersStarted=true;stopAdminProducts=onSnapshot(productsRef,snap=>{adminProducts=snap.docs.map(d=>({id:d.id,...d.data()}));renderAdminProducts();},e=>{$('adminProducts').textContent='प्रोडक्ट लोड नहीं हुए: '+esc(e.message);});stopAdminOrders=onSnapshot(ordersRef,snap=>{adminOrders=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderAdminOrders();},e=>{$('adminOrders').textContent='ऑर्डर लोड नहीं हुए: '+esc(e.message);});}
 function maybeShowAdminRoute(){if(new URLSearchParams(location.search).get('admin')==='1'){if(auth.currentUser?.uid===ADMIN_UID)startStoreAdmin();else $('adminLoginArea').classList.add('show');}}
 $('productSearch').addEventListener('input',renderProducts);
@@ -252,6 +324,11 @@ $('adminSignOut').addEventListener('click',async()=>{if(stopAdminProducts)stopAd
 $('productForm').addEventListener('submit',async e=>{e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID){alert('केवल अधिकृत Admin प्रोडक्ट सेव कर सकता है।');return;}const button=$('saveProduct');button.disabled=true;button.textContent='सेव हो रहा है…';try{const old=adminProducts.find(p=>p.id===editingProductId);const file=$('pImage').files[0];const imageUrl=file?await uploadStoreImage(file):(old?.imageUrl||'');const data={name:$('pName').value.trim(),category:$('pCategory').value,description:$('pDescription').value.trim(),price:Number($('pPrice').value),stock:Number($('pStock').value),imageUrl,active:$('pActive').checked,updatedAt:serverTimestamp()};if(!data.name||!data.category||!Number.isFinite(data.price)||data.price<=0||!Number.isInteger(data.stock)||data.stock<0)throw new Error('प्रोडक्ट की जानकारी जाँचें।');if(editingProductId)await updateDoc(doc(db,'storeProducts',editingProductId),data);else await addDoc(productsRef,{...data,createdAt:serverTimestamp()});resetProductForm();}catch(error){console.error(error);alert('प्रोडक्ट सेव नहीं हुआ: '+(error.message||error.code||''));}finally{button.disabled=false;button.textContent=editingProductId?'बदलाव सेव करें':'प्रोडक्ट सेव करें';}});
 $('cancelProductEdit').addEventListener('click',resetProductForm);
 $('adminProducts').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-product]')?.dataset.editProduct,toggle=e.target.closest('[data-toggle-product]')?.dataset.toggleProduct,del=e.target.closest('[data-delete-product]')?.dataset.deleteProduct;if(edit){const p=adminProducts.find(x=>x.id===edit);if(!p)return;editingProductId=edit;$('pName').value=p.name||'';$('pCategory').value=p.category||'';$('pPrice').value=p.price||'';$('pStock').value=p.stock??0;$('pDescription').value=p.description||'';$('pActive').checked=!!p.active;$('saveProduct').textContent='बदलाव सेव करें';$('cancelProductEdit').classList.remove('hidden');$('pImageInfo').textContent='नई फोटो चुनें तो पुरानी फोटो बदल जाएगी।';$('productForm').scrollIntoView({behavior:'smooth',block:'start'});}else if(toggle){const p=adminProducts.find(x=>x.id===toggle);if(p)await updateDoc(doc(db,'storeProducts',toggle),{active:!p.active,updatedAt:serverTimestamp()});}else if(del&&confirm('क्या आप यह प्रोडक्ट हटाना चाहते हैं?')){await deleteDoc(doc(db,'storeProducts',del));}});
+$('orderSearch').addEventListener('input',renderAdminOrders);
+$('orderStatusFilter').addEventListener('change',renderAdminOrders);
+$('orderPaymentFilter').addEventListener('change',renderAdminOrders);
+$('orderMethodFilter').addEventListener('change',renderAdminOrders);
+$('exportOrdersCsv').addEventListener('click',exportFilteredOrdersCsv);
 $('adminOrders').addEventListener('click',async e=>{
   const courierButton=e.target.closest('[data-save-courier]');
   if(courierButton){
