@@ -50,13 +50,24 @@
 @media(max-width:950px){.order-dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.order-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.order-tools input{grid-column:1/-1}}
 @media(max-width:520px){.order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.order-tools{grid-template-columns:1fr}.order-tools input{grid-column:auto}.order-tools .btn{width:100%}}
  .store-admin-nav{background:#172033!important;color:#fff!important;border:1px solid #172033!important;font-size:12px;padding:8px 11px}.store-admin-nav:hover{background:#344054!important}
+
+.login-modal-backdrop{display:none;position:fixed;inset:0;z-index:50;background:rgba(16,24,40,.62);padding:18px;align-items:center;justify-content:center;overflow:auto;backdrop-filter:blur(3px)}
+.login-modal-backdrop.show{display:flex}
+.login-modal-card{width:min(100%,440px);max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #f2dcc9;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(16,24,40,.28);animation:storeLoginPop .18s ease-out}
+.login-modal-card .login-box{max-width:none;margin:14px 0 0;border:0;padding:0}
+.login-modal-card .panel-head{align-items:flex-start}
+.login-modal-card .field input{min-height:43px}
+.login-modal-card #storeLoginMessage{min-height:18px;margin:10px 0 0;font-size:12px;color:#b42318}
+@keyframes storeLoginPop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:480px){.login-modal-backdrop{padding:10px}.login-modal-card{padding:17px;border-radius:15px}}
+
 </style>
 </head>
 <body>
 <div class="store-top"><span>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</span><span>📞 7089748108 · Since 2017</span></div>
 <header class="store-nav">
   <a class="brand" href="index.html" style="text-decoration:none"><img class="brand-mark" src="shri-balaji-logo-website.png" alt="श्रीबालाजी कम्युनिकेशन"><span><b>श्रीबालाजी कम्युनिकेशन</b><small>Online Computer & Electronics Store</small></span></a>
-  <div class="nav-actions"><a class="btn secondary" href="index.html">← मुख्य वेबसाइट</a><a class="btn secondary" href="#orderTracking" id="trackOrderNav">Track Order</a><a class="btn store-admin-nav" href="store.html?admin=1" id="storeAdminNav">🔐 Login</a><button class="btn" id="openCartTop" type="button">🛒 कार्ट <span id="cartCountTop" class="count">0</span></button></div>
+  <div class="nav-actions"><a class="btn secondary" href="index.html">← मुख्य वेबसाइट</a><a class="btn secondary" href="#orderTracking" id="trackOrderNav">Track Order</a><a class="btn store-admin-nav" href="#store-admin-login" id="storeAdminNav" aria-haspopup="dialog" aria-controls="adminLoginArea">🔐 Login</a><button class="btn" id="openCartTop" type="button">🛒 कार्ट <span id="cartCountTop" class="count">0</span></button></div>
 </header>
 <section class="hero"><div><span class="eyebrow">ONLINE COMPUTER & ELECTRONICS STORE</span><h1>आपकी जरूरत का सामान, अब ऑनलाइन</h1><p>कंप्यूटर एक्सेसरीज, स्टोरेज डिवाइस, प्रिंटर सप्लाई, नेटवर्किंग और इलेक्ट्रॉनिक सामान देखें। पसंदीदा प्रोडक्ट कार्ट में जोड़ें और ऑनलाइन ऑर्डर करें।</p></div><div class="hero-badge"><strong>🛍️ Easy Shopping</strong><small>UPI और Cash विकल्प</small></div></section>
 <main class="container">
@@ -115,7 +126,21 @@
       <div id="adminOrders" class="admin-list">ऑर्डर लोड हो रहे हैं…</div>
     </section>
   </section>
-  <section id="adminLoginArea" class="admin-area"><h3>Store Admin Login</h3><p class="checkout-note">प्रोडक्ट और ऑर्डर प्रबंधन के लिए अधिकृत Admin लॉगिन करें।</p><form id="storeLoginForm" class="login-box"><div class="field"><label for="storeAdminEmail">ईमेल</label><input id="storeAdminEmail" type="email" required autocomplete="username"></div><div class="field"><label for="storeAdminPassword">पासवर्ड</label><input id="storeAdminPassword" type="password" required autocomplete="current-password"></div><button class="btn" id="storeLoginButton" type="submit">लॉगिन करें</button><p id="storeLoginMessage" role="status"></p></form></section>
+  <section id="adminLoginArea" class="login-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="storeLoginTitle" aria-hidden="true">
+    <div class="login-modal-card">
+      <div class="panel-head">
+        <div><span class="eyebrow">SECURE STORE ACCESS</span><h3 id="storeLoginTitle" style="margin:8px 0 0">Store Login</h3></div>
+        <button class="icon-btn" id="closeStoreLogin" type="button" aria-label="Close login">✕</button>
+      </div>
+      <p class="checkout-note">प्रोडक्ट और ऑर्डर प्रबंधन के लिए अधिकृत Store Admin लॉगिन करें।</p>
+      <form id="storeLoginForm" class="login-box">
+        <div class="field"><label for="storeAdminEmail">Email</label><input id="storeAdminEmail" type="email" required autocomplete="username" placeholder="Store Admin Email"></div>
+        <div class="field"><label for="storeAdminPassword">Password</label><input id="storeAdminPassword" type="password" required autocomplete="current-password" placeholder="अपना पासवर्ड दर्ज करें"></div>
+        <button class="btn" id="storeLoginButton" type="submit" style="width:100%">Login</button>
+        <p id="storeLoginMessage" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
 </main>
 <button class="cart-fab" id="openCartFab" type="button">🛒 कार्ट <span id="cartCountFab" class="count">0</span></button>
 <div id="cartOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
@@ -267,7 +292,7 @@ function exportFilteredOrdersCsv(){
 }
 
 function startStoreAdmin(){ if(!isStoreManager())return; $('adminLoginArea').classList.add('hidden');$('storeAdminArea').classList.add('show');$('adminIdentity').textContent=(auth.currentUser?.email||'Authorized Admin')+(auth.currentUser?.uid===STORE_ADMIN_UID?' · Store Manager':' · Main Admin');if(adminListenersStarted)return;adminListenersStarted=true;stopAdminProducts=onSnapshot(productsRef,snap=>{adminProducts=snap.docs.map(d=>({id:d.id,...d.data()}));renderAdminProducts();},e=>{$('adminProducts').textContent='प्रोडक्ट लोड नहीं हुए: '+esc(e.message);});stopAdminOrders=onSnapshot(ordersRef,snap=>{adminOrders=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderAdminOrders();},e=>{$('adminOrders').textContent='ऑर्डर लोड नहीं हुए: '+esc(e.message);});}
-function maybeShowAdminRoute(){if(new URLSearchParams(location.search).get('admin')==='1'){if(isStoreManager())startStoreAdmin();else $('adminLoginArea').classList.add('show');}}
+function maybeShowAdminRoute(){if(new URLSearchParams(location.search).get('admin')==='1'){if(isStoreManager())startStoreAdmin();else{$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');}}}
 $('productSearch').addEventListener('input',renderProducts);
 $('categoryChips').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;activeCategory=b.dataset.category;renderCategories();renderProducts();});
 $('productGrid').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const p=products.find(x=>x.id===b.dataset.add);if(!p||p.stock<1)return;const found=cart.find(x=>x.id===p.id);if(found){if(found.qty>=p.stock)return;found.qty++;}else cart.push({id:p.id,name:p.name,price:Number(p.price),qty:1,stock:Number(p.stock)});saveCart();b.textContent='जोड़ दिया ✓';setTimeout(()=>{if(b.isConnected)b.textContent='कार्ट में जोड़ें +';},900);});
@@ -335,8 +360,13 @@ $('orderTrackForm').addEventListener('submit',async e=>{
   finally{button.disabled=false;button.textContent='Track Order';}
 });
 $('storeLoginForm').addEventListener('submit',async e=>{e.preventDefault();$('storeLoginButton').disabled=true;showNotice('लॉगिन हो रहा है…');try{const credential=await signInWithEmailAndPassword(auth,$('storeAdminEmail').value.trim(),$('storeAdminPassword').value);if(!isStoreAdminUser(credential.user)){await signOut(auth);showNotice('इस अकाउंट को Store Management की अनुमति नहीं है।');}else{showNotice('');startStoreAdmin();}}catch(error){showNotice('लॉगिन नहीं हुआ। ईमेल और पासवर्ड जाँचें।');console.error(error);}finally{$('storeLoginButton').disabled=false;}});
-onAuthStateChanged(auth,user=>{if(new URLSearchParams(location.search).get('admin')==='1'){if(isStoreAdminUser(user))startStoreAdmin();else{$('adminLoginArea').classList.add('show');$('storeAdminArea').classList.remove('show');}}});
-$('adminSignOut').addEventListener('click',async()=>{if(stopAdminProducts)stopAdminProducts();if(stopAdminOrders)stopAdminOrders();stopAdminProducts=null;stopAdminOrders=null;adminListenersStarted=false;adminProducts=[];adminOrders=[];await signOut(auth);$('storeAdminArea').classList.remove('show');$('adminLoginArea').classList.add('show');});
+$('storeAdminNav').addEventListener('click',e=>{e.preventDefault();if(isStoreManager()){$('storeAdminArea').classList.add('show');$('storeAdminArea').scrollIntoView({behavior:'smooth',block:'start'});}else{$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');$('storeAdminEmail').focus();}});
+function closeStoreLoginModal(){ $('adminLoginArea').classList.remove('show'); $('adminLoginArea').setAttribute('aria-hidden','true'); }
+$('closeStoreLogin').addEventListener('click',closeStoreLoginModal);
+$('adminLoginArea').addEventListener('click',e=>{if(e.target===$('adminLoginArea'))closeStoreLoginModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('adminLoginArea').classList.contains('show'))closeStoreLoginModal();});
+onAuthStateChanged(auth,user=>{if(new URLSearchParams(location.search).get('admin')==='1'){if(isStoreAdminUser(user))startStoreAdmin();else{$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');$('storeAdminArea').classList.remove('show');}}});
+$('adminSignOut').addEventListener('click',async()=>{if(stopAdminProducts)stopAdminProducts();if(stopAdminOrders)stopAdminOrders();stopAdminProducts=null;stopAdminOrders=null;adminListenersStarted=false;adminProducts=[];adminOrders=[];await signOut(auth);$('storeAdminArea').classList.remove('show');$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');});
 $('productForm').addEventListener('submit',async e=>{e.preventDefault();if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट सेव कर सकता है।');return;}const button=$('saveProduct');button.disabled=true;button.textContent='सेव हो रहा है…';try{const old=adminProducts.find(p=>p.id===editingProductId);const file=$('pImage').files[0];const imageUrl=file?await uploadStoreImage(file):(old?.imageUrl||'');const data={name:$('pName').value.trim(),category:$('pCategory').value,description:$('pDescription').value.trim(),price:Number($('pPrice').value),stock:Number($('pStock').value),imageUrl,active:$('pActive').checked,updatedAt:serverTimestamp()};if(!data.name||!data.category||!Number.isFinite(data.price)||data.price<=0||!Number.isInteger(data.stock)||data.stock<0)throw new Error('प्रोडक्ट की जानकारी जाँचें।');if(editingProductId)await updateDoc(doc(db,'storeProducts',editingProductId),data);else await addDoc(productsRef,{...data,createdAt:serverTimestamp()});resetProductForm();}catch(error){console.error(error);alert('प्रोडक्ट सेव नहीं हुआ: '+(error.message||error.code||''));}finally{button.disabled=false;button.textContent=editingProductId?'बदलाव सेव करें':'प्रोडक्ट सेव करें';}});
 $('cancelProductEdit').addEventListener('click',resetProductForm);
 $('adminProducts').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-product]')?.dataset.editProduct,toggle=e.target.closest('[data-toggle-product]')?.dataset.toggleProduct,del=e.target.closest('[data-delete-product]')?.dataset.deleteProduct;if(edit||toggle||del){if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट मैनेज कर सकता है।');return;}}if(edit){const p=adminProducts.find(x=>x.id===edit);if(!p)return;editingProductId=edit;$('pName').value=p.name||'';$('pCategory').value=p.category||'';$('pPrice').value=p.price||'';$('pStock').value=p.stock??0;$('pDescription').value=p.description||'';$('pActive').checked=!!p.active;$('saveProduct').textContent='बदलाव सेव करें';$('cancelProductEdit').classList.remove('hidden');$('pImageInfo').textContent='नई फोटो चुनें तो पुरानी फोटो बदल जाएगी।';$('productForm').scrollIntoView({behavior:'smooth',block:'start'});}else if(toggle){const p=adminProducts.find(x=>x.id===toggle);if(p)await updateDoc(doc(db,'storeProducts',toggle),{active:!p.active,updatedAt:serverTimestamp()});}else if(del&&confirm('क्या आप यह प्रोडक्ट हटाना चाहते हैं?')){await deleteDoc(doc(db,'storeProducts',del));}});
