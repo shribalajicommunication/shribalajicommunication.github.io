@@ -30,6 +30,23 @@
 .order-controls>.btn{justify-self:start;padding:7px 14px;font-size:12px}
 @media(max-width:760px){.order-admin-card{grid-template-columns:1fr}.order-controls{min-width:0;grid-template-columns:1fr 1fr}.order-controls>.btn{grid-column:1/-1}}
 @media(max-width:430px){.order-payment-grid{grid-template-columns:1fr}.order-controls{grid-template-columns:1fr}}
+/* Customer Track Order popup */
+.order-track-modal-backdrop{display:none;position:fixed;inset:0;z-index:60;background:rgba(16,24,40,.66);padding:18px;align-items:center;justify-content:center;overflow-y:auto;backdrop-filter:blur(3px)}
+.order-track-modal-backdrop.show{display:flex}
+.order-track-modal-card{width:min(100%,760px);max-height:calc(100vh - 36px);overflow-y:auto;background:#fff;border:1px solid #f2dcc9;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(16,24,40,.28);animation:storeLoginPop .18s ease-out}
+.order-track-modal-card .track-form{margin-top:14px}
+.order-track-modal-card .track-result{margin-top:16px}
+.order-activity{grid-column:1/-1;background:#fff;border:1px solid #e4e7ec;border-radius:11px;padding:12px;margin-top:2px}
+.order-activity h3{font-size:14px;margin:0 0 11px}
+.order-activity-list{display:grid;gap:10px}
+.order-activity-step{display:grid;grid-template-columns:20px 1fr;gap:9px;align-items:start;min-width:0}
+.order-activity-dot{width:18px;height:18px;display:grid;place-items:center;border-radius:50%;border:2px solid #d0d5dd;background:#fff;color:#fff;font-size:10px;font-weight:900;line-height:1}
+.order-activity-step.done .order-activity-dot{background:#159455;border-color:#159455}
+.order-activity-step.current .order-activity-dot{background:#e87519;border-color:#e87519;box-shadow:0 0 0 3px #ffead8}
+.order-activity-step b{display:block;font-size:12px;line-height:1.35}
+.order-activity-step small{display:block;color:var(--muted);font-size:10px;margin-top:2px;line-height:1.4}
+.order-cancelled{background:#fff1f0;border:1px solid #fecdca;color:#b42318;border-radius:9px;padding:10px;font-size:12px;font-weight:750}
+@media(max-width:600px){.order-track-modal-backdrop{padding:10px}.order-track-modal-card{padding:16px;border-radius:15px;max-height:calc(100vh - 20px)}.order-track-modal-card .track-form{grid-template-columns:1fr}.order-track-modal-card .track-form .btn{grid-column:auto;width:100%}}
 .order-track-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin:32px 0 10px;box-shadow:var(--shadow);scroll-margin-top:100px}
 .order-track-box h2{margin:8px 0 5px;font-size:22px}.track-form{display:grid;grid-template-columns:1.2fr 1fr auto;align-items:end;gap:12px;margin-top:12px}.track-form .field{margin:0}.track-form .btn{height:40px;white-space:nowrap}.track-result{margin-top:12px}.track-result:empty{display:none}.track-result-card{border:1px solid #b7e4c7;background:#f6fef9;border-radius:12px;padding:13px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.track-result-card .track-cell{background:#fff;border:1px solid #e4eee8;border-radius:9px;padding:9px;min-width:0}.track-result-card small{display:block;color:var(--muted);font-size:10px;font-weight:750;margin-bottom:4px}.track-result-card b{display:block;font-size:13px;overflow-wrap:anywhere}.track-help{font-size:12px;color:var(--muted);margin:9px 0 0;line-height:1.5}.courier-admin-fields{border-top:1px solid var(--line);padding-top:9px;margin-top:9px;display:grid;gap:7px}.courier-admin-fields .courier-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.courier-admin-fields label{display:grid;gap:4px;font-size:10px;color:var(--muted);font-weight:750}.courier-admin-fields input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;color:var(--ink);background:#fff}.courier-admin-fields .btn{justify-self:start;padding:7px 12px;font-size:11px}
 .courier-admin-fields .courier-save-primary{justify-self:start;width:100%;max-width:280px;min-height:40px;padding:9px 16px;background:#e87519;color:#fff;border:1px solid #c65b0c;border-radius:10px;font-size:12px;font-weight:850;letter-spacing:.15px;box-shadow:0 5px 14px rgba(232,117,25,.30);transition:background .15s ease,transform .15s ease,box-shadow .15s ease}
@@ -67,7 +84,7 @@
 <div class="store-top"><span>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</span><span>📞 7089748108 · Since 2017</span></div>
 <header class="store-nav">
   <a class="brand" href="index.html" style="text-decoration:none"><img class="brand-mark" src="shri-balaji-logo-website.png" alt="श्रीबालाजी कम्युनिकेशन"><span><b>श्रीबालाजी कम्युनिकेशन</b><small>Online Computer & Electronics Store</small></span></a>
-  <div class="nav-actions"><a class="btn secondary" href="index.html">← मुख्य वेबसाइट</a><a class="btn secondary" href="#orderTracking" id="trackOrderNav">Track Order</a><a class="btn store-admin-nav" href="#store-admin-login" id="storeAdminNav" aria-haspopup="dialog" aria-controls="adminLoginArea">🔐 Login</a><button class="btn" id="openCartTop" type="button">🛒 कार्ट <span id="cartCountTop" class="count">0</span></button></div>
+  <div class="nav-actions"><a class="btn secondary" href="index.html">← मुख्य वेबसाइट</a><button class="btn secondary" type="button" id="trackOrderNav">Track Order</button><a class="btn store-admin-nav" href="#store-admin-login" id="storeAdminNav" aria-haspopup="dialog" aria-controls="adminLoginArea">🔐 Login</a><button class="btn" id="openCartTop" type="button">🛒 कार्ट <span id="cartCountTop" class="count">0</span></button></div>
 </header>
 <section class="hero"><div><span class="eyebrow">ONLINE COMPUTER & ELECTRONICS STORE</span><h1>आपकी जरूरत का सामान, अब ऑनलाइन</h1><p>कंप्यूटर एक्सेसरीज, स्टोरेज डिवाइस, प्रिंटर सप्लाई, नेटवर्किंग और इलेक्ट्रॉनिक सामान देखें। पसंदीदा प्रोडक्ट कार्ट में जोड़ें और ऑनलाइन ऑर्डर करें।</p></div><div class="hero-badge"><strong>🛍️ Easy Shopping</strong><small>UPI और Cash विकल्प</small></div></section>
 <main class="container">
@@ -76,17 +93,22 @@
   <div class="catalogue-head"><div><h2>हमारे प्रोडक्ट</h2><small>कीमत और उपलब्धता प्रोडक्ट के अनुसार देखें</small></div></div>
   <div id="productGrid" class="product-grid"><div class="empty">प्रोडक्ट लोड हो रहे हैं…</div></div>
 
-  <section class="order-track-box" id="orderTracking">
-    <span class="eyebrow">ORDER TRACKING</span>
-    <h2>अपने ऑर्डर की स्थिति देखें</h2>
-    <p class="checkout-note">Order Number और ऑर्डर करते समय दिया गया मोबाइल नंबर भरें। Dispatch होने के बाद Courier Company और AWB Number यहाँ दिखाई देंगे।</p>
-    <form id="orderTrackForm" class="track-form">
-      <div class="field"><label for="trackOrderNumber">Order Number *</label><input id="trackOrderNumber" required maxlength="24" placeholder="जैसे SBCO-261122-ABCD" autocomplete="off"></div>
-      <div class="field"><label for="trackOrderPhone">Registered Mobile Number *</label><input id="trackOrderPhone" required inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" placeholder="10 अंकों का मोबाइल नंबर" autocomplete="tel"></div>
-      <button class="btn" id="trackOrderButton" type="submit">Track Order</button>
-    </form>
-    <div id="orderTrackResult" class="track-result" role="status" aria-live="polite"></div>
-  </section>
+  <div id="orderTrackModal" class="order-track-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="orderTrackTitle" aria-hidden="true">
+    <section class="order-track-modal-card">
+      <div class="panel-head">
+        <div><span class="eyebrow">ORDER TRACKING</span><h2 id="orderTrackTitle" style="margin:8px 0 0">Track Your Order</h2></div>
+        <button class="icon-btn" id="closeOrderTrackModal" type="button" aria-label="Close order tracking">✕</button>
+      </div>
+      <p class="checkout-note">Enter your Order Number and registered mobile number to view order activity and courier details.</p>
+      <form id="orderTrackForm" class="track-form">
+        <div class="field"><label for="trackOrderNumber">Order Number *</label><input id="trackOrderNumber" required maxlength="24" placeholder="e.g. SBCO-261122-ABCD" autocomplete="off"></div>
+        <div class="field"><label for="trackOrderPhone">Registered Mobile Number *</label><input id="trackOrderPhone" required inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" placeholder="10-digit mobile number" autocomplete="tel"></div>
+        <button class="btn" id="trackOrderButton" type="submit">Track Order</button>
+      </form>
+      <div id="orderTrackResult" class="track-result" role="status" aria-live="polite"></div>
+      <p class="track-help">Order activity is updated by Shri Balaji Communication. Courier live location is available on the courier company’s official tracking website.</p>
+    </section>
+  </div>
 
   <section id="storeAdminArea" class="admin-area">
     <div class="admin-head"><div><span class="eyebrow">STORE MANAGEMENT</span><h2>Online Store Admin</h2><small id="adminIdentity" style="color:var(--muted)"></small></div><button class="btn secondary" id="adminSignOut" type="button">Admin Logout</button></div>
@@ -429,13 +451,40 @@ $('checkoutForm').addEventListener('submit',async e=>{
       const upi=`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent('Shri Balaji Communication')}&cu=INR&tn=${encodeURIComponent(orderNumber)}`;
       payHtml=`<div class="upi-wrap"><img src="${UPI_QR}" alt="UPI QR Code"><div><b>UPI भुगतान</b><p style="font-size:12px;margin:5px 0">Courier शुल्क सहित अंतिम राशि की पुष्टि के बाद ही भुगतान करें।<br>UPI ID: <strong>${UPI_ID}</strong></p><button class="btn" type="button" id="copyUpiId">UPI ID कॉपी करें</button> <a class="btn secondary" href="${esc(upi)}">UPI App खोलें</a><p class="checkout-note">QR स्कैन करके या UPI App से भुगतान करें। भुगतान की पुष्टि दुकान द्वारा की जाएगी।</p></div></div>`;
     }
-    $('orderSuccess').innerHTML=`<b>आपका ऑर्डर प्राप्त हो गया है!</b><p style="margin:8px 0 2px">Order Number</p><div class="order-no">${esc(orderNumber)}</div><p style="font-size:13px">सामान की राशि: <b>${money(subtotal)}</b><br>Courier शुल्क अलग से पुष्टि होगा। ऑर्डर की स्थिति देखने के लिए Order Number और अपना मोबाइल नंबर सुरक्षित रखें।</p>${payHtml}<a class="btn secondary" style="margin-top:12px" href="#orderTracking" onclick="document.getElementById('cartOverlay').classList.remove('open');document.getElementById('orderTracking').scrollIntoView({behavior:'smooth'});return false;">Track Order</a> <a class="btn secondary" style="margin-top:12px" href="https://wa.me/917089748108?text=${encodeURIComponent('नमस्ते, मेरा ऑनलाइन स्टोर ऑर्डर '+orderNumber+' है। कृपया इसकी पुष्टि करें।')}" target="_blank" rel="noopener">WhatsApp पर ऑर्डर भेजें</a>`;
+    $('orderSuccess').innerHTML=`<b>आपका ऑर्डर प्राप्त हो गया है!</b><p style="margin:8px 0 2px">Order Number</p><div class="order-no">${esc(orderNumber)}</div><p style="font-size:13px">सामान की राशि: <b>${money(subtotal)}</b><br>Courier शुल्क अलग से पुष्टि होगा। ऑर्डर की स्थिति देखने के लिए Order Number और अपना मोबाइल नंबर सुरक्षित रखें।</p>${payHtml}<button class="btn secondary" style="margin-top:12px" type="button" data-open-order-tracking data-order-number="${esc(orderNumber)}" data-order-phone="${esc(phone)}">Track Order</button> <a class="btn secondary" style="margin-top:12px" href="https://wa.me/917089748108?text=${encodeURIComponent('नमस्ते, मेरा ऑनलाइन स्टोर ऑर्डर '+orderNumber+' है। कृपया इसकी पुष्टि करें।')}" target="_blank" rel="noopener">WhatsApp पर ऑर्डर भेजें</a>`;
     $('orderSuccess').classList.add('show');
     if(paymentMethod==='UPI')$('copyUpiId')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(UPI_ID);$('copyUpiId').textContent='कॉपी हो गया ✓';}catch{alert('UPI ID: '+UPI_ID);}});
     $('checkoutForm').reset();$('buyerPincode').value='';
   }catch(error){console.error('Store order error:',error);alert('ऑर्डर सेव नहीं हुआ। कृपया दोबारा प्रयास करें या WhatsApp पर संपर्क करें।\n'+(error.code||error.message||''));}
   finally{submit.disabled=false;submit.textContent='ऑर्डर कन्फर्म करें';}
 });
+function openOrderTrackingModal(orderNumber='',phone=''){
+  const modal=$('orderTrackModal');
+  if(!modal)return;
+  if(orderNumber)$('trackOrderNumber').value=orderNumber;
+  if(phone)$('trackOrderPhone').value=phone;
+  $('cartOverlay').classList.remove('open');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  $('trackOrderNumber').focus({preventScroll:true});
+}
+function closeOrderTrackingModal(){
+  const modal=$('orderTrackModal');
+  if(!modal)return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+$('trackOrderNav').addEventListener('click',()=>openOrderTrackingModal());
+$('closeOrderTrackModal').addEventListener('click',closeOrderTrackingModal);
+$('orderTrackModal').addEventListener('click',e=>{if(e.target===$('orderTrackModal'))closeOrderTrackingModal();});
+$('orderSuccess').addEventListener('click',e=>{
+  const button=e.target.closest('[data-open-order-tracking]');
+  if(!button)return;
+  openOrderTrackingModal(button.dataset.orderNumber||'',button.dataset.orderPhone||'');
+});
+
 $('orderTrackForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const orderNumber=$('trackOrderNumber').value.trim().toUpperCase();
@@ -451,13 +500,26 @@ $('orderTrackForm').addEventListener('submit',async e=>{
     const snap=await getDoc(doc(orderTrackingRef,key));
     if(!snap.exists()||snap.data().orderNumber!==orderNumber){result.innerHTML='<div class="notice">Order Number या मोबाइल नंबर मेल नहीं खाता। कृपया दोनों जानकारी जाँचें।</div>';return;}
     const d=snap.data();
+    const orderedStages=['नया ऑर्डर','ऑर्डर कन्फर्म','पैकिंग','भेज दिया गया','डिलीवर'];
+    const activeStage=orderedStages.indexOf(d.orderStatus||'नया ऑर्डर');
+    const cancelled=d.orderStatus==='रद्द';
+    const activityHtml=cancelled
+      ? `<div class="order-cancelled">✕ Order Cancelled</div>`
+      : `<div class="order-activity-list">${orderedStages.map((stage,i)=>{
+          const stageClass=i<activeStage?'done':i===activeStage?'current':'pending';
+          const stageNote=i===3&&d.dispatchDate?`Dispatch Date: ${esc(d.dispatchDate)}`:(i===activeStage?'Current status':'');
+          return `<div class="order-activity-step ${stageClass}"><span class="order-activity-dot">${i<=activeStage?'✓':''}</span><div><b>${esc(orderStatusLabel(stage))}</b>${stageNote?`<small>${stageNote}</small>`:''}</div></div>`;
+        }).join('')}</div>`;
+    const updatedAt=d.updatedAt?.seconds?new Date(d.updatedAt.seconds*1000).toLocaleString('en-IN'):'Not available';
     result.innerHTML=`<div class="track-result-card">
       <div class="track-cell"><small>Order Number</small><b>${esc(d.orderNumber)}</b></div>
-      <div class="track-cell"><small>Order Status</small><b>${esc(d.orderStatus||'नया ऑर्डर')}</b></div>
-      <div class="track-cell"><small>Courier Company</small><b>${esc(d.courierCompany||'Dispatch के बाद अपडेट होगा')}</b></div>
-      <div class="track-cell"><small>AWB / Tracking Number</small><b>${esc(d.trackingNumber||'अभी उपलब्ध नहीं')}</b></div>
-      <div class="track-cell"><small>Dispatch Date</small><b>${esc(d.dispatchDate||'अभी Dispatch नहीं हुआ')}</b></div>
-    </div><p class="track-help">यह जानकारी श्रीबालाजी कम्युनिकेशन द्वारा अपडेट की जाती है। Courier Company की Live Location देखने के लिए संबंधित Courier की आधिकारिक Tracking सुविधा का उपयोग करें।</p>`;
+      <div class="track-cell"><small>Order Status</small><b>${esc(orderStatusLabel(d.orderStatus||'नया ऑर्डर'))}</b></div>
+      <div class="track-cell"><small>Courier Company</small><b>${esc(d.courierCompany||'Will update after dispatch')}</b></div>
+      <div class="track-cell"><small>AWB / Tracking Number</small><b>${esc(d.trackingNumber||'Not available yet')}</b></div>
+      <div class="track-cell"><small>Dispatch Date</small><b>${esc(d.dispatchDate||'Not dispatched yet')}</b></div>
+      <div class="track-cell"><small>Last Updated</small><b>${esc(updatedAt)}</b></div>
+      <div class="order-activity"><h3>Order Activity</h3>${activityHtml}</div>
+    </div>`;
   }catch(error){console.error('Order tracking lookup error:',error);result.innerHTML=`<div class="notice">Tracking जानकारी अभी नहीं मिल सकी। कृपया कुछ देर बाद प्रयास करें। <small>${esc(error.code||'')}</small></div>`;}
   finally{button.disabled=false;button.textContent='Track Order';}
 });
@@ -466,7 +528,7 @@ $('storeAdminNav').addEventListener('click',e=>{e.preventDefault();if(isStoreMan
 function closeStoreLoginModal(){ $('adminLoginArea').classList.remove('show'); $('adminLoginArea').setAttribute('aria-hidden','true'); }
 $('closeStoreLogin').addEventListener('click',closeStoreLoginModal);
 $('adminLoginArea').addEventListener('click',e=>{if(e.target===$('adminLoginArea'))closeStoreLoginModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('adminLoginArea').classList.contains('show'))closeStoreLoginModal();});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('adminLoginArea').classList.contains('show'))closeStoreLoginModal();if($('orderTrackModal').classList.contains('show'))closeOrderTrackingModal();});
 onAuthStateChanged(auth,user=>{
   if(isStoreAdminUser(user)){
     // Handle both Main Admin and Store Admin on every Store page visit,
