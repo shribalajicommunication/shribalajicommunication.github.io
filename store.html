@@ -254,6 +254,9 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
 .product-card:hover .product-discount-ribbon{transform:rotate(0) scale(1.04);box-shadow:0 9px 20px rgba(225,29,72,.36),0 0 0 3px rgba(255,255,255,.55)}
 .product-price-block{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
 .product-price-block .price{font-size:21px;color:#102b55;font-weight:950}
+.product-price-label{font-size:10px;color:#66758c;font-weight:800;letter-spacing:.2px;display:block;line-height:1.2;margin-bottom:2px}
+.product-mrp-wrap{display:flex;flex-direction:column;gap:2px}
+.product-sale-wrap{display:flex;flex-direction:column;gap:2px}
 .product-mrp{font-size:11px;color:#8491a5;text-decoration:line-through;font-weight:650}
 .discount-pill{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:#ecfdf3;color:#07804a;font-size:10px;font-weight:900;white-space:nowrap}
 .product-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:5px}
@@ -287,7 +290,9 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
 .product-details-info{display:grid;gap:10px;align-content:start}
 .product-details-info h2{font-size:22px;line-height:1.3;margin:0;color:#14284d}
 .product-details-description{white-space:pre-line;overflow-wrap:anywhere;color:#586b86;font-size:13px;line-height:1.75;max-height:210px;overflow:auto}
-.product-details-price{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.product-details-price{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.product-details-price-group{display:flex;flex-direction:column;gap:2px}
+.product-details-price-label{font-size:11px;color:#66758c;font-weight:800;letter-spacing:.2px}
 .product-details-price strong{font-size:27px;color:#14284d}
 .product-details-price del{color:#8290a5;font-size:14px}
 .product-details-off{display:inline-flex;align-items:center;border-radius:999px;padding:6px 11px;background:linear-gradient(110deg,#ff3b30,#e11d48);color:#fff;font-size:13px;font-weight:950;box-shadow:0 5px 14px #e11d4840}
@@ -296,6 +301,28 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
 .product-details-actions .btn{min-height:43px}
 @media(max-width:620px){.product-details-backdrop{padding:9px}.product-details-card{padding:14px;border-radius:16px;max-height:calc(100vh - 18px)}.product-details-layout{grid-template-columns:1fr;gap:14px}.product-details-photo,.product-details-photo img{min-height:190px;height:190px}.product-details-info h2{font-size:19px}.product-details-description{max-height:160px}}
 
+
+/* Mobile readability + compact product card refinements */
+.product-card .product-body{gap:10px;padding:15px}
+.product-card .product-body h3{font-size:clamp(18px,2.1vw,21px);line-height:1.4;font-weight:750;min-height:0}
+.product-card .product-price-row{align-items:center;gap:8px;flex-wrap:wrap}
+.product-card .product-price{font-size:clamp(25px,3vw,29px);font-weight:800}
+.product-card .price{font-size:clamp(25px,3vw,29px);font-weight:800}
+.product-card .product-mrp{font-size:15px}
+.product-card .stock{font-size:13px;padding:7px 10px}
+.product-card .product-actions{gap:7px;margin-top:9px}
+.product-card .product-actions .btn{font-size:13px;min-height:40px;padding:9px 10px}
+.product-card .product-desc{display:none!important}
+@media(max-width:620px){
+  body{font-size:16px}
+  .product-card .product-body{gap:9px;padding:13px}
+  .product-card .product-body h3{font-size:18px;line-height:1.42;min-height:0}
+  .product-card .price,.product-card .product-price{font-size:25px}
+  .product-card .product-mrp{font-size:14px}
+  .product-card .stock{font-size:12px}
+  .product-card .product-actions{gap:5px}
+  .product-card .product-actions .btn{font-size:12px;min-height:40px;padding:8px 5px}
+}
 </style>
 </head>
 <body>
@@ -622,7 +649,7 @@ function renderProducts(){
   else if(sort==='stock')list.sort((a,b)=>Number(b.stock)-Number(a.stock));
   $('productCount').textContent=`${list.length} प्रोडक्ट`;
   if(!list.length){$('productGrid').innerHTML=`<div class="empty"><div style="font-size:34px;margin-bottom:8px">🛍️</div><b>${products.length?'इस खोज से कोई प्रोडक्ट नहीं मिला':'स्टोर में प्रोडक्ट जल्द उपलब्ध होंगे'}</b><p style="margin:7px 0 0;font-size:12px">Admin Panel से प्रोडक्ट फोटो, कीमत और स्टॉक जोड़ने पर वे यहाँ दिखाई देंगे।</p></div>`;return;}
-  $('productGrid').innerHTML=list.map(p=>{const stockQty=Number(p.stock)||0;const stockBadge=stockQty<=0?'OUT OF STOCK':stockQty<=5?`ONLY ${stockQty} LEFT`:'IN STOCK';const mrp=productMrp(p),off=productDiscountPercent(p);return `<article class="product-card"><div class="product-image"><span class="product-image-badge ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockBadge}</span>${off?`<span class="product-discount-ribbon">${off}% OFF</span>`:''}${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}" loading="lazy">`:`<span class="placeholder">${icons[p.category]||'🛍️'}</span>`}<span class="product-image-sheen" aria-hidden="true"></span></div><div class="product-body"><span class="product-category"><span>${icons[p.category]||'✦'}</span> ${esc(p.category)}</span><h3>${esc(p.name)}</h3><div class="product-desc" title="${esc(p.description||'')}">${esc(p.description||'')}</div><div class="product-price-row"><div class="product-price-block"><span class="price">${money(p.price)}</span>${off?`<span class="product-mrp">${money(mrp)}</span><span class="discount-pill">${off}% छूट</span>`:''}</div><span class="stock ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockQty>0?`स्टॉक: ${stockQty}`:'स्टॉक उपलब्ध नहीं'}</span></div><div class="product-actions"><button class="btn secondary" data-view-details="${esc(p.id)}" type="button">View Details</button><button class="btn secondary" data-add="${esc(p.id)}" ${stockQty<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" data-buy="${esc(p.id)}" ${stockQty<=0?'disabled':''}>Buy Now ⚡</button></div></div></article>`;}).join('');
+  $('productGrid').innerHTML=list.map(p=>{const stockQty=Number(p.stock)||0;const stockBadge=stockQty<=0?'OUT OF STOCK':stockQty<=5?`ONLY ${stockQty} LEFT`:'IN STOCK';const mrp=productMrp(p),off=productDiscountPercent(p);return `<article class="product-card"><div class="product-image"><span class="product-image-badge ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockBadge}</span>${off?`<span class="product-discount-ribbon">${off}% OFF</span>`:''}${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}" loading="lazy">`:`<span class="placeholder">${icons[p.category]||'🛍️'}</span>`}<span class="product-image-sheen" aria-hidden="true"></span></div><div class="product-body"><h3>${esc(p.name)}</h3><div class="product-desc" title="${esc(p.description||'')}">${esc(p.description||'')}</div><div class="product-price-row"><div class="product-price-block"><span class="product-sale-wrap"><span class="product-price-label">Selling Price</span><span class="price">${money(p.price)}</span></span>${off?`<span class="product-mrp-wrap"><span class="product-price-label">MRP</span><span class="product-mrp">${money(mrp)}</span></span>`:''}</div><span class="stock ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockQty>0?`स्टॉक: ${stockQty}`:'स्टॉक उपलब्ध नहीं'}</span></div><div class="product-actions"><button class="btn secondary" data-view-details="${esc(p.id)}" type="button">View Details</button><button class="btn secondary" data-add="${esc(p.id)}" ${stockQty<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" data-buy="${esc(p.id)}" ${stockQty<=0?'disabled':''}>Buy Now ⚡</button></div></div></article>`;}).join('');
 }
 function cartTotal(){return cart.reduce((sum,x)=>sum+x.price*x.qty,0);}
 function courierChargeForSubtotal(subtotal){const amount=Number(subtotal)||0;return amount<=1000?40:0;}
@@ -870,7 +897,7 @@ $('trackOrderSide').addEventListener('click',()=>openOrderTrackingModal());
 $('categoryChips').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;activeCategory=b.dataset.category;renderCategories();renderProducts();});
 function addProductToCart(p,openAfter=false){if(!p||Number(p.stock)<1)return false;const found=cart.find(x=>x.id===p.id);if(found){if(found.qty>=Number(p.stock)){alert('इस प्रोडक्ट का पूरा उपलब्ध स्टॉक पहले से आपके कार्ट में है।');return false;}found.qty++;}else cart.push({id:p.id,name:p.name,price:Number(p.price),mrp:productMrp(p),qty:1,stock:Number(p.stock)});saveCart();if(openAfter)openCart();else renderCart();return true;}
 function closeProductDetails(){const modal=$('productDetailsModal');modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
-function openProductDetails(id){const p=products.find(x=>x.id===id);if(!p)return;const mrp=productMrp(p),off=productDiscountPercent(p),stock=Number(p.stock)||0;$('productDetailsContent').innerHTML=`<div class="product-details-layout"><div class="product-details-photo">${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}">`:`<span style="font-size:76px">${icons[p.category]||'🛍️'}</span>`}</div><div class="product-details-info"><span class="product-category">${icons[p.category]||'✦'} ${esc(p.category||'')}</span><h2 id="productDetailsTitle">${esc(p.name)}</h2><div class="product-details-price"><strong>${money(p.price)}</strong>${off?`<del>${money(mrp)}</del><span class="product-details-off">${off}% OFF</span>`:''}</div><span class="product-details-stock" style="color:${stock<=0?'#b42318':stock<=5?'#b45309':'#078451'}">${stock>0?`उपलब्ध स्टॉक: ${stock}`:'स्टॉक उपलब्ध नहीं'}</span><div class="product-details-description">${esc(p.description||'इस प्रोडक्ट का विवरण उपलब्ध नहीं है।')}</div><div class="product-details-actions"><button class="btn secondary" id="detailsAddToCart" type="button" ${stock<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" id="detailsBuyNow" type="button" ${stock<=0?'disabled':''}>Buy Now ⚡</button></div></div></div>`;$('productDetailsModal').classList.add('show');$('productDetailsModal').setAttribute('aria-hidden','false');$('detailsAddToCart').addEventListener('click',()=>{if(addProductToCart(p)){closeProductDetails();}});$('detailsBuyNow').addEventListener('click',()=>{if(addProductToCart(p,true))closeProductDetails();});}
+function openProductDetails(id){const p=products.find(x=>x.id===id);if(!p)return;const mrp=productMrp(p),off=productDiscountPercent(p),stock=Number(p.stock)||0;$('productDetailsContent').innerHTML=`<div class="product-details-layout"><div class="product-details-photo">${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}">`:`<span style="font-size:76px">${icons[p.category]||'🛍️'}</span>`}</div><div class="product-details-info"><span class="product-category">${icons[p.category]||'✦'} ${esc(p.category||'')}</span><h2 id="productDetailsTitle">${esc(p.name)}</h2><div class="product-details-price"><span class="product-details-price-group"><span class="product-details-price-label">Selling Price</span><strong>${money(p.price)}</strong></span>${off?`<span class="product-details-price-group"><span class="product-details-price-label">MRP</span><del>${money(mrp)}</del></span><span class="product-details-off">${off}% OFF</span>`:''}</div><span class="product-details-stock" style="color:${stock<=0?'#b42318':stock<=5?'#b45309':'#078451'}">${stock>0?`उपलब्ध स्टॉक: ${stock}`:'स्टॉक उपलब्ध नहीं'}</span><div class="product-details-description">${esc(p.description||'इस प्रोडक्ट का विवरण उपलब्ध नहीं है।')}</div><div class="product-details-actions"><button class="btn secondary" id="detailsAddToCart" type="button" ${stock<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" id="detailsBuyNow" type="button" ${stock<=0?'disabled':''}>Buy Now ⚡</button></div></div></div>`;$('productDetailsModal').classList.add('show');$('productDetailsModal').setAttribute('aria-hidden','false');$('detailsAddToCart').addEventListener('click',()=>{if(addProductToCart(p)){closeProductDetails();}});$('detailsBuyNow').addEventListener('click',()=>{if(addProductToCart(p,true))closeProductDetails();});}
 $('productGrid').addEventListener('click',e=>{const detailsButton=e.target.closest('[data-view-details]');if(detailsButton){openProductDetails(detailsButton.dataset.viewDetails);return;}const addButton=e.target.closest('[data-add]'),buyButton=e.target.closest('[data-buy]'),b=addButton||buyButton;if(!b)return;const p=products.find(x=>x.id===(b.dataset.add||b.dataset.buy));if(!p||Number(p.stock)<1)return;if(addProductToCart(p,!!buyButton)){if(!buyButton){b.textContent='✓ Added';setTimeout(()=>{if(b.isConnected)b.textContent='🛒 Add to Cart';},900);}}});
 $('closeProductDetails').addEventListener('click',closeProductDetails);$('productDetailsModal').addEventListener('click',e=>{if(e.target===$('productDetailsModal'))closeProductDetails();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProductDetails();});
 $('openCartTop').addEventListener('click',openCart);$('openCartFab').addEventListener('click',openCart);$('closeCart').addEventListener('click',closeCart);$('cartOverlay').addEventListener('click',e=>{if(e.target===$('cartOverlay'))closeCart();});
