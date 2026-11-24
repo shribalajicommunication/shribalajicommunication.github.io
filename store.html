@@ -163,7 +163,7 @@
     </section>
     <section id="ordersPane" class="admin-pane">
       <h3>ग्राहक ऑर्डर</h3>
-      <p class="checkout-note">सभी ऑर्डर यहाँ देखें, खोजें और स्थिति के अनुसार फ़िल्टर करें। UPI भुगतान की पुष्टि बैंक/UPI ऐप में देखकर ही करें।</p>
+      <p class="checkout-note">सभी ऑर्डर यहाँ देखें, खोजें और स्थिति के अनुसार फ़िल्टर करें। ऑर्डर को कन्फर्म / पैकिंग / डिस्पैच करने पर स्टॉक अपने आप घटेगा; वापस नया या रद्द करने पर स्टॉक लौटेगा। UPI भुगतान की पुष्टि बैंक/UPI ऐप में देखकर ही करें।</p>
       <div id="orderStats" class="order-dashboard-stats" aria-live="polite"></div>
       <div class="order-tools">
         <input id="orderSearch" type="search" placeholder="Order Number, ग्राहक, मोबाइल या प्रोडक्ट खोजें…" aria-label="ऑर्डर खोजें">
@@ -222,7 +222,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js';
-import { getFirestore, collection, onSnapshot, query, where, addDoc, doc, updateDoc, deleteDoc, getDoc, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
+import { getFirestore, collection, onSnapshot, query, where, addDoc, doc, updateDoc, deleteDoc, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js';
 const firebaseConfig = {apiKey:'AIzaSyAOzHP3bOvs_0OLLathBdlzZc1ZrBJWW_I',authDomain:'shri-balaji-communication.firebaseapp.com',projectId:'shri-balaji-communication',storageBucket:'shri-balaji-communication.firebasestorage.app',messagingSenderId:'248414940916',appId:'1:248414940916:web:bb273d296281c211ee78a1'};
 const ADMIN_UID='NZAAy9G9QCfHlwsuVhYTqkUwil62', STORE_ADMIN_UID='rNNvLoiQL3VthmtwYa5jV8Po5AU2', CLOUDINARY_CLOUD_NAME='rctadrxy', CLOUDINARY_UPLOAD_PRESET='shri_balaji_posters', UPI_ID='Q236395372@ybl';
 const isStoreAdminUser = user => !!user && (user.uid === ADMIN_UID || user.uid === STORE_ADMIN_UID);
@@ -239,6 +239,58 @@ async function makeOrderTrackingKey(orderNumber,phone){
   const bytes=new TextEncoder().encode(normalizedOrder+'|'+normalizedPhone);
   const digest=await crypto.subtle.digest('SHA-256',bytes);
   return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Reserve product stock when an order enters a confirmed/active stage.
+// Release the reserved stock if the order is moved back to New or Cancelled.
+// Transactional updates prevent duplicate deductions and overselling when
+// multiple admin actions happen close together.
+async function saveOrderWithInventory(order,updates){
+  if(!isStoreManager())throw new Error('केवल अधिकृत Store Admin ऑर्डर अपडेट कर सकता है।');
+  const orderRef=doc(db,'storeOrders',order.id);
+  const trackingKey=await makeOrderTrackingKey(order.orderNumber,order.customerPhone);
+  const trackingRef=doc(orderTrackingRef,trackingKey);
+  await runTransaction(db,async transaction=>{
+    const orderSnap=await transaction.get(orderRef);
+    if(!orderSnap.exists())throw new Error('यह ऑर्डर अब उपलब्ध नहीं है।');
+    const current=orderSnap.data();
+    const oldStatus=current.orderStatus||'नया ऑर्डर';
+    const nextStatus=updates.orderStatus||oldStatus;
+    const isReserved=status=>!['नया ऑर्डर','रद्द'].includes(status);
+    const wasReserved=isReserved(oldStatus);
+    const willBeReserved=isReserved(nextStatus);
+    if(wasReserved&&nextStatus==='नया ऑर्डर')throw new Error('यह ऑर्डर पहले से कन्फर्म / प्रक्रिया में है। इसे वापस नया ऑर्डर नहीं कर सकते; रद्द करना हो तो रद्द चुनें।');
+    const stockDirection=!wasReserved&&willBeReserved?-1:(wasReserved&&nextStatus==='रद्द'?1:0);
+    const quantities=new Map();
+    if(stockDirection!==0){
+      for(const item of (current.items||[])){
+        const productId=String(item.productId||'').trim();
+        const quantity=Number(item.quantity)||0;
+        if(!productId||!Number.isInteger(quantity)||quantity<1)throw new Error('ऑर्डर में प्रोडक्ट की जानकारी अधूरी है। स्टॉक मैन्युअल जाँचें।');
+        const entry=quantities.get(productId)||{quantity:0,name:item.name||productId};
+        entry.quantity+=quantity;quantities.set(productId,entry);
+      }
+    }
+    const productReads=await Promise.all([...quantities.keys()].map(id=>transaction.get(doc(db,'storeProducts',id))));
+    const stockWrites=[];
+    let index=0;
+    for(const [productId,entry] of quantities){
+      const productSnap=productReads[index++];
+      if(!productSnap.exists())throw new Error(`प्रोडक्ट उपलब्ध नहीं है: ${entry.name}. कृपया ऑर्डर की जाँच करें।`);
+      const product=productSnap.data();
+      const available=Number(product.stock);
+      if(!Number.isInteger(available)||available<0)throw new Error(`प्रोडक्ट ${entry.name} का स्टॉक रिकॉर्ड सही नहीं है।`);
+      if(stockDirection<0&&available<entry.quantity)throw new Error(`स्टॉक कम है: ${entry.name}. उपलब्ध ${available}, आवश्यक ${entry.quantity}. पहले स्टॉक अपडेट करें।`);
+      stockWrites.push({ref:doc(db,'storeProducts',productId),stock:available+(stockDirection*entry.quantity)});
+    }
+    // All transaction reads are complete before writes begin.
+    for(const item of stockWrites)transaction.update(item.ref,{stock:item.stock,updatedAt:serverTimestamp()});
+    const courierCompany=Object.prototype.hasOwnProperty.call(updates,'courierCompany')?updates.courierCompany:(current.courierCompany||'');
+    const trackingNumber=Object.prototype.hasOwnProperty.call(updates,'trackingNumber')?updates.trackingNumber:(current.trackingNumber||'');
+    const dispatchDate=Object.prototype.hasOwnProperty.call(updates,'dispatchDate')?updates.dispatchDate:(current.dispatchDate||'');
+    transaction.update(orderRef,{...updates,updatedAt:serverTimestamp()});
+    transaction.set(trackingRef,{orderDocId:order.id,orderNumber:current.orderNumber,orderStatus:nextStatus,courierCompany,trackingNumber,dispatchDate,updatedAt:serverTimestamp()},{merge:true});
+  });
 }
 const ORDER_STATUS_LABELS={
   'नया ऑर्डर':'New Order',
@@ -566,12 +618,9 @@ $('adminOrders').addEventListener('click',async e=>{
     courierButton.disabled=true;courierButton.textContent='सेव हो रहा है…';
     try{
       const orderStatus=hasAny?'भेज दिया गया':(order.orderStatus||'नया ऑर्डर');
-      const key=await makeOrderTrackingKey(order.orderNumber,order.customerPhone);
-      const batch=writeBatch(db);
-      batch.update(doc(db,'storeOrders',id),{courierCompany,trackingNumber,dispatchDate,orderStatus,updatedAt:serverTimestamp()});
-      batch.set(doc(orderTrackingRef,key),{orderDocId:id,orderNumber:order.orderNumber,orderStatus,courierCompany,trackingNumber,dispatchDate,updatedAt:serverTimestamp()},{merge:true});
-      await batch.commit();courierButton.textContent='Saved ✓';
-    }catch(error){console.error('Courier detail save error:',error);alert('Courier Details सेव नहीं हुए: '+(error.code||error.message||''));courierButton.disabled=false;courierButton.textContent='Save Courier Details';}
+      await saveOrderWithInventory(order,{courierCompany,trackingNumber,dispatchDate,orderStatus});
+      courierButton.textContent='Saved ✓';
+    }catch(error){console.error('Courier detail save error:',error);alert('Courier Details सेव नहीं हुए: '+(error.message||error.code||''));courierButton.disabled=false;courierButton.textContent='Save Courier Details';}
     return;
   }
   const b=e.target.closest('[data-save-order]');if(!b)return;
@@ -582,13 +631,11 @@ $('adminOrders').addEventListener('click',async e=>{
   if(!orderStatus||!paymentStatus)return;
   b.disabled=true;b.textContent='सेव…';
   try{
-    const key=await makeOrderTrackingKey(order.orderNumber,order.customerPhone);
-    const batch=writeBatch(db);
-    batch.update(doc(db,'storeOrders',id),{orderStatus,paymentStatus,updatedAt:serverTimestamp()});
-    batch.set(doc(orderTrackingRef,key),{orderDocId:id,orderNumber:order.orderNumber,orderStatus,courierCompany:order.courierCompany||'',trackingNumber:order.trackingNumber||'',dispatchDate:order.dispatchDate||'',updatedAt:serverTimestamp()},{merge:true});
-    await batch.commit();b.textContent='सेव ✓';
-  }catch(error){console.error(error);alert('ऑर्डर अपडेट नहीं हुआ: '+(error.code||error.message||''));b.disabled=false;b.textContent='Save Order';}
+    await saveOrderWithInventory(order,{orderStatus,paymentStatus});
+    b.textContent='सेव ✓';
+  }catch(error){console.error('Order save error:',error);alert('ऑर्डर अपडेट नहीं हुआ: '+(error.message||error.code||''));b.disabled=false;b.textContent='Save Order';}
 });
+
 document.querySelectorAll('[data-pane]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.admin-tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.admin-pane').forEach(x=>x.classList.toggle('active',x.id===b.dataset.pane));}));
 document.querySelectorAll('[data-product-subpane]').forEach(b=>b.addEventListener('click',()=>setProductSubPane(b.dataset.productSubpane)));
 document.querySelectorAll('[data-open-pane]').forEach(b=>b.addEventListener('click',()=>{
