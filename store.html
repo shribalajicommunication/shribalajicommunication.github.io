@@ -323,13 +323,56 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
   .product-card .product-actions{gap:5px}
   .product-card .product-actions .btn{font-size:12px;min-height:40px;padding:8px 5px}
 }
+
+/* Header alignment refinement: keep primary actions together and Main Website at the right */
+.store-nav{gap:16px}
+.nav-actions{margin-left:auto;justify-content:flex-end;flex-wrap:wrap}
+.main-site-link{order:10;white-space:nowrap}
+#openCartTop{white-space:nowrap}
+@media(max-width:620px){
+  .store-nav{align-items:center;flex-wrap:wrap}
+  .brand{flex:1 1 100%;max-width:100%}
+  .nav-actions{width:100%;margin-left:0;display:flex;justify-content:flex-end;gap:6px}
+  .nav-actions .btn{font-size:11px;padding:8px 10px}
+  .main-site-link{margin-left:auto}
+}
+</style>
+
+<style id="balanced-store-typography-tune">
+/* Subtle typography refinement: product cards intentionally remain unchanged. */
+@media (min-width:621px){
+  .store-top{font-size:13px}
+  .brand b{font-size:19px}.brand small{font-size:12px}
+  .nav-actions .btn{font-size:14px}
+  .benefit-item b{font-size:14px}.benefit-item small{font-size:12px}
+  .search input{font-size:15px}
+  .product-count-pill{font-size:13px}.sort-control,.sort-control select{font-size:13px}
+  .category-heading b{font-size:15px}.category-heading small{font-size:11px}
+  .section-kicker{font-size:10px}.category-chip{font-size:12px}
+  .side-trust-card b,.side-support-card b{font-size:14px}
+  .side-trust-card p,.side-support-card p{font-size:11px}
+  .side-payment-tags span{font-size:10px}.side-call-link{font-size:13px}.side-track-link{font-size:11px}
+}
+@media (max-width:620px){
+  .store-top{font-size:10px}
+  .brand b{font-size:15px}.brand small{font-size:9px}
+  .nav-actions .btn{font-size:10px}
+  .benefit-item b{font-size:11px}.benefit-item small{font-size:9px}
+  .search input{font-size:12px}
+  .product-count-pill{font-size:10px}.sort-control,.sort-control select{font-size:10px}
+  .category-heading b{font-size:15px}.section-kicker{font-size:10px}
+  .category-chip{font-size:10px}.category-chip-icon{font-size:13px}
+  .side-trust-card b,.side-support-card b{font-size:14px}
+  .side-trust-card p,.side-support-card p{font-size:11px}
+  .side-payment-tags span{font-size:10px}.side-call-link{font-size:13px}.side-track-link{font-size:11px}
+}
 </style>
 </head>
 <body>
 <div class="store-top"><span>📍 कदवाया रोड, ईसागढ़, जिला अशोकनगर, मध्य प्रदेश</span><span>📞 7089748108 · Since 2017</span></div>
 <header class="store-nav">
   <a class="brand" href="index.html" style="text-decoration:none"><img class="brand-mark" src="shri-balaji-logo-website.png" alt="श्रीबालाजी कम्युनिकेशन"><span><b>श्रीबालाजी कम्युनिकेशन</b><small>Online Computer & Electronics Store</small></span></a>
-  <div class="nav-actions"><a class="btn secondary" href="index.html">← मुख्य वेबसाइट</a><button class="btn secondary" type="button" id="trackOrderNav">Track Order</button><a class="btn store-admin-nav" href="#store-admin-login" id="storeAdminNav" aria-haspopup="dialog" aria-controls="adminLoginArea">🔐 Login</a><button class="btn" id="openCartTop" type="button">🛒 कार्ट <span id="cartCountTop" class="count">0</span></button></div>
+  <div class="nav-actions"><button class="btn" id="openCartTop" type="button">🛒 Cart <span id="cartCountTop" class="count">0</span></button><button class="btn secondary" type="button" id="trackOrderNav">Track Order</button><a class="btn store-admin-nav" href="#store-admin-login" id="storeAdminNav" aria-haspopup="dialog" aria-controls="adminLoginArea">🔐 Login</a><a class="btn secondary main-site-link" href="index.html">← मुख्य वेबसाइट</a></div>
 </header>
 <section class="hero">
   <div class="hero-content">
@@ -486,7 +529,7 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
     </div>
   </section>
 </main>
-<button class="cart-fab" id="openCartFab" type="button">🛒 कार्ट <span id="cartCountFab" class="count">0</span></button>
+<button class="cart-fab" id="openCartFab" type="button">🛒 Cart <span id="cartCountFab" class="count">0</span></button>
 <div id="cartOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
   <section class="cart-panel"><div class="panel-head"><h2 id="cartTitle">आपका Shopping Cart</h2><button class="icon-btn" id="closeCart" type="button" aria-label="बंद करें">✕</button></div>
     <div id="cartList" class="cart-list"></div><div class="cart-total"><span>सामान की राशि</span><span id="cartTotal">₹0</span></div><div class="cart-shipping-breakdown"><div class="cart-discount-row hidden" id="cartDiscountRow"><span>🎉 कुल Discount / आपकी बचत</span><strong id="cartDiscountAmount">₹0</strong></div><div class="cart-shipping-row"><span>Courier Charge</span><strong id="cartCourierCharge">₹40</strong></div><div class="cart-shipping-row total"><span>Final Payable Amount</span><strong id="cartFinalTotal">₹40</strong></div><small id="cartDeliveryNote" class="checkout-note">₹1,000 तक के ऑर्डर पर Courier ₹40। ₹1,000 से अधिक पर Free Delivery।</small></div>
