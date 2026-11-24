@@ -85,6 +85,98 @@
 @keyframes storeLoginPop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){.login-modal-backdrop{padding:10px}.login-modal-card{padding:17px;border-radius:15px}}
 
+
+
+/* Admin Panel visual refresh — clear color zones, readable controls */
+#storeAdminArea{--admin-blue:#2563eb;--admin-blue-soft:#eff6ff;--admin-purple:#7c3aed;--admin-purple-soft:#f5f3ff;--admin-teal:#0f766e;--admin-teal-soft:#ecfdf5;--admin-amber:#b45309;--admin-amber-soft:#fffbeb;--admin-red:#b91c1c;--admin-red-soft:#fef2f2;padding:22px;border:1px solid #dbe4f0;border-radius:20px;background:linear-gradient(180deg,#fff 0%,#f9fbff 100%);box-shadow:0 16px 42px rgba(24,39,75,.10)}
+#storeAdminArea .admin-head{padding:4px 2px 16px;border-bottom:1px solid #e5eaf3}
+#storeAdminArea .admin-head .eyebrow{background:#e8f1ff;color:#1d4ed8;letter-spacing:.65px}
+#storeAdminArea .admin-head h2{font-size:clamp(22px,2.5vw,29px);letter-spacing:-.5px;margin:5px 0 3px}
+#storeAdminArea .admin-head small{font-size:12px;color:#64748b!important}
+#storeAdminArea #adminSignOut{border-color:#fecaca;color:#b91c1c;background:#fff7f7;font-weight:800}
+#storeAdminArea .admin-tabs{position:relative;top:auto;gap:10px;margin:15px 0 18px;padding:10px;background:#f1f5fb;border:1px solid #e2e8f0;border-radius:14px}
+#storeAdminArea .admin-tab{position:relative;min-height:42px;padding:10px 17px;border:1px solid #dce4f0;border-radius:10px;background:#fff;color:#40516a;font-size:13px;transition:.18s ease}
+#storeAdminArea .admin-tab:nth-child(1){--tab-color:#2563eb;--tab-soft:#eff6ff}
+#storeAdminArea .admin-tab:nth-child(2){--tab-color:#7c3aed;--tab-soft:#f5f3ff}
+#storeAdminArea .admin-tab:nth-child(3){--tab-color:#0f766e;--tab-soft:#ecfdf5}
+#storeAdminArea .admin-tab:hover{border-color:var(--tab-color);color:var(--tab-color);background:var(--tab-soft)}
+#storeAdminArea .admin-tab.active{background:var(--tab-color);border-color:var(--tab-color);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--tab-color) 23%,transparent)}
+#storeAdminArea .admin-pane>h3{font-size:20px;letter-spacing:-.2px;margin:9px 0 8px!important;color:#172b4d}
+#storeAdminArea .admin-pane>p{color:#63738a;line-height:1.65}
+#storeAdminArea .admin-subtabs{background:#f5f3ff;border:1px solid #e6ddff;border-radius:13px;padding:8px}
+#storeAdminArea .admin-subtab{border-radius:9px;padding:9px 13px;color:#6041a5}
+#storeAdminArea .admin-subtab.active{background:#6d38c6;color:white;border-color:#6d38c6;box-shadow:0 4px 12px rgba(109,56,198,.18)}
+#storeAdminArea .store-dash-card{position:relative;overflow:hidden;border:1px solid #dce6f4;border-radius:14px;padding:15px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 4px 12px rgba(29,54,92,.04)}
+#storeAdminArea .store-dash-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#2563eb}
+#storeAdminArea .store-dash-card:nth-child(2):before{background:#7c3aed}#storeAdminArea .store-dash-card:nth-child(3):before{background:#d97706}#storeAdminArea .store-dash-card:nth-child(4):before{background:#0f766e}
+#storeAdminArea .store-dash-card span{font-size:11px;color:#60718a}#storeAdminArea .store-dash-card strong{font-size:27px;color:#172b4d}
+#storeAdminArea .store-dash-actions .btn{min-height:39px}
+#storeAdminArea .order-dashboard-stats{gap:10px;margin:14px 0 15px}
+#storeAdminArea .order-stat-card{position:relative;overflow:hidden;border:1px solid #dce5f1;border-radius:14px;padding:13px 14px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 3px 11px rgba(29,54,92,.035)}
+#storeAdminArea .order-stat-card:before{content:"";display:block;position:absolute;top:0;left:0;right:0;height:4px;background:#2563eb}
+#storeAdminArea .order-stat-card:nth-child(2):before{background:#0d9488}#storeAdminArea .order-stat-card:nth-child(3):before{background:#d97706}#storeAdminArea .order-stat-card:nth-child(4):before{background:#7c3aed}#storeAdminArea .order-stat-card:nth-child(5):before{background:#16a34a}
+#storeAdminArea .order-stat-card span{color:#62748d;font-size:11px;font-weight:800;margin-top:2px}
+#storeAdminArea .order-stat-card strong{font-size:26px;color:#172b4d;margin-top:6px}
+#storeAdminArea .order-tools{padding:11px;background:#f4f7fc;border:1px solid #e0e8f3;border-radius:14px;gap:9px}
+#storeAdminArea .order-tools input,#storeAdminArea .order-tools select{min-height:42px;border:1px solid #cfd9e8;border-radius:10px;background:#fff;font-size:12px;transition:border-color .15s,box-shadow .15s}
+#storeAdminArea .order-tools input:focus,#storeAdminArea .order-tools select:focus{outline:0;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+#storeAdminArea #exportOrdersCsv{background:#ecfdf5;border:1px solid #a7f3d0;color:#047857;font-weight:850}
+#storeAdminArea #orderFilterCount{font-weight:700;color:#526783}
+#storeAdminArea .order-admin-card{position:relative;overflow:hidden;align-items:stretch!important;gap:18px;padding:16px;border:1px solid #d8e3f0;border-radius:16px;background:#fff;box-shadow:0 5px 18px rgba(26,51,86,.055);transition:border-color .15s,box-shadow .15s}
+#storeAdminArea .order-admin-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#0f766e}
+#storeAdminArea .order-admin-card:hover{border-color:#a9c8df;box-shadow:0 8px 24px rgba(26,51,86,.09)}
+#storeAdminArea .order-admin-main{padding-left:3px}
+#storeAdminArea .order-topline{justify-content:flex-start;gap:10px;margin-bottom:8px}
+#storeAdminArea .order-topline>b{font-size:15px;color:#172b4d;letter-spacing:.1px}
+#storeAdminArea .order-admin-main>small{font-size:12px;line-height:1.75;color:#596b83}
+#storeAdminArea .order-state-pill{margin-left:auto;padding:6px 11px;border:1px solid transparent;font-size:10px;letter-spacing:.15px}
+#storeAdminArea .order-state-pill.new{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+#storeAdminArea .order-state-pill.confirmed{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+#storeAdminArea .order-state-pill.packing{background:#f5f3ff;border-color:#ddd6fe;color:#6d28d9}
+#storeAdminArea .order-state-pill.shipped{background:#ecfeff;border-color:#a5f3fc;color:#0e7490}
+#storeAdminArea .order-state-pill.delivered{background:#ecfdf3;border-color:#abefc6;color:#067647}
+#storeAdminArea .order-state-pill.cancelled{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+#storeAdminArea .order-payment-grid{gap:9px;margin:12px 0}
+#storeAdminArea .order-info-box{min-height:62px;border-radius:11px;padding:10px 11px;background:#f8fbff;border-color:#dce7f4}
+#storeAdminArea .order-info-box.method-box{background:#eff6ff;border-color:#bfdbfe}
+#storeAdminArea .order-info-box.payment-box{background:#fffbeb;border-color:#fde68a}
+#storeAdminArea .order-info-box span{color:#5c708b;font-size:10px;letter-spacing:.25px}
+#storeAdminArea .order-info-box strong{font-size:12px;color:#253b5a}
+#storeAdminArea .order-info-box .payment-state.paid{color:#047857}
+#storeAdminArea .order-info-box .payment-state.pending{color:#b45309}
+#storeAdminArea .order-whatsapp{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;font-weight:850}
+#storeAdminArea .order-controls{min-width:0;align-content:start;gap:10px;padding:13px;border:1px solid #dce8f5;border-radius:14px;background:linear-gradient(160deg,#f8fbff,#f2f7ff)}
+#storeAdminArea .order-amount-panel{margin:0 0 2px;padding:12px;border-radius:12px;border:1px solid #bfdbfe;background:linear-gradient(135deg,#eff6ff,#f8fbff);gap:10px}
+#storeAdminArea .order-amount-panel>div:first-child{padding:4px 6px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa}
+#storeAdminArea .order-amount-panel>div:first-child strong{color:#c2410c!important;font-size:17px}
+#storeAdminArea .order-amount-total{padding:4px 6px;border-radius:8px;background:#ecfdf5;border:1px solid #a7f3d0}
+#storeAdminArea .order-amount-total small{color:#047857;font-size:10px}
+#storeAdminArea .order-amount-total strong{font-size:21px;color:#047857}
+#storeAdminArea .order-amount-hint{font-size:10px;color:#64748b;line-height:1.5}
+#storeAdminArea .order-control{padding:9px 10px;border:1px solid #d9e4f2;border-radius:10px;background:#fff}
+#storeAdminArea .order-control span{font-size:11px;color:#334e70;letter-spacing:.1px}
+#storeAdminArea .order-control select{min-height:40px;padding:8px 10px;border:1px solid #cbd8e8;border-radius:9px;font-size:12px;color:#203650;font-weight:650}
+#storeAdminArea .order-status-control{border-left:4px solid #2563eb;background:#f8fbff}
+#storeAdminArea .payment-status-control{border-left:4px solid #d97706;background:#fffcf5}
+#storeAdminArea .order-status-control select:focus{outline:0;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+#storeAdminArea .payment-status-control select:focus{outline:0;border-color:#d97706;box-shadow:0 0 0 3px #fef3c7}
+#storeAdminArea .order-save-primary{justify-self:stretch!important;min-height:42px;padding:10px 15px!important;border-radius:10px;background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 5px 13px rgba(37,99,235,.2);font-size:13px!important}
+#storeAdminArea .order-save-primary:hover{background:linear-gradient(135deg,#1d4ed8,#1e40af)}
+#storeAdminArea .courier-admin-fields{border-top:1px dashed #b8cce2;margin-top:3px;padding-top:12px;gap:9px}
+#storeAdminArea .courier-section-title{color:#6d28d9;font-size:13px!important}
+#storeAdminArea .courier-admin-fields label{color:#5b4a83;font-size:11px}
+#storeAdminArea .courier-admin-fields input{min-height:38px;border-color:#d9ccf5;border-radius:9px;background:#fff;font-size:12px}
+#storeAdminArea .courier-admin-fields input:focus{outline:0;border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+#storeAdminArea .courier-admin-fields .courier-save-primary{max-width:none;min-height:41px;justify-self:stretch;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-color:#6d28d9;box-shadow:0 5px 13px rgba(124,58,237,.19)}
+#storeAdminArea .courier-admin-fields .courier-save-primary:hover{background:linear-gradient(135deg,#6d28d9,#5b21b6)}
+#storeAdminArea .admin-row:not(.order-admin-card){border:1px solid #dce5f1;border-radius:12px;background:#fff}
+#storeAdminArea .admin-row:not(.order-admin-card) .btn.secondary{background:#f8fafc}
+#storeAdminArea .admin-form input:focus,#storeAdminArea .admin-form select:focus,#storeAdminArea .admin-form textarea:focus{outline:0;border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
+#storeAdminArea button:focus-visible,#storeAdminArea a:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+@media(max-width:760px){#storeAdminArea{padding:14px;border-radius:15px}#storeAdminArea .order-admin-card{grid-template-columns:1fr}#storeAdminArea .order-controls{grid-template-columns:1fr 1fr}#storeAdminArea .order-save-primary,#storeAdminArea .courier-admin-fields{grid-column:1/-1}#storeAdminArea .order-stat-card strong{font-size:23px}}
+@media(max-width:520px){#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab{width:100%;padding:10px 7px}#storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}#storeAdminArea .order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#storeAdminArea .order-tools{grid-template-columns:1fr}#storeAdminArea .order-tools input{grid-column:auto}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){#storeAdminArea *{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -455,16 +547,18 @@ function renderAdminOrders(){
     const paymentLabel=o.paymentStatus==='भुगतान प्राप्त'?receivedLabel:pendingLabel;
     const paymentTone=o.paymentStatus==='भुगतान प्राप्त'?'paid':'pending';
     const orderStatusOptions=['नया ऑर्डर','ऑर्डर कन्फर्म','पैकिंग','भेज दिया गया','डिलीवर','रद्द'];
+    const currentOrderStatus=o.orderStatus||'नया ऑर्डर';
+    const orderTone=({'नया ऑर्डर':'new','ऑर्डर कन्फर्म':'confirmed','पैकिंग':'packing','भेज दिया गया':'shipped','डिलीवर':'delivered','रद्द':'cancelled'})[currentOrderStatus]||'new';
     const subtotal=Number(o.subtotal??o.total??0);
     const courierCharge=courierChargeForSubtotal(subtotal);
     const totalPayable=Number(o.totalPayable??(subtotal+courierCharge));
     return `<div class="admin-row order-admin-card" style="align-items:flex-start">
       <div class="order-admin-main">
-        <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill">${esc(orderStatusLabel(o.orderStatus||'नया ऑर्डर'))}</span></div>
+        <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill ${orderTone}">${esc(orderStatusLabel(currentOrderStatus))}</span></div>
         <small>${esc(o.customerName)} · ${esc(o.customerPhone)}<br>${itemText}<br>सामान की राशि: <b>${money(subtotal)}</b><br>डिलीवरी: <b>Courier Delivery</b><br>पता: ${esc(o.customerAddress||'पता नहीं दिया')}</small>
         <div class="order-payment-grid">
-          <div class="order-info-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
-          <div class="order-info-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
+          <div class="order-info-box method-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
+          <div class="order-info-box payment-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
         </div>
         <a href="https://wa.me/91${encodeURIComponent(o.customerPhone||'')}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।') }" target="_blank" rel="noopener" class="btn secondary order-whatsapp">WhatsApp</a>
       </div>
@@ -474,11 +568,11 @@ function renderAdminOrders(){
           <div class="order-amount-total"><small>Final Payable Amount</small><strong data-final-total="${esc(o.id)}">${money(totalPayable)}</strong></div>
           <small class="order-amount-hint">Fixed rule: सामान ₹1,000 तक Courier ₹40; ₹1,000 से अधिक पर Free Delivery। Save Order दबाने पर यही बिल Tracking में अपडेट होगा।</small>
         </div>
-        <label class="order-control"><span>Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option value="${esc(v)}" ${o.orderStatus===v?'selected':''}>${esc(orderStatusLabel(v))}</option>`).join('')}</select></label>
-        <label class="order-control"><span>Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
-        <button class="btn" data-save-order="${esc(o.id)}" type="button">Save Order</button>
+        <label class="order-control order-status-control"><span>📦 Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option value="${esc(v)}" ${o.orderStatus===v?'selected':''}>${esc(orderStatusLabel(v))}</option>`).join('')}</select></label>
+        <label class="order-control payment-status-control"><span>💳 Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
+        <button class="btn order-save-primary" data-save-order="${esc(o.id)}" type="button">✓ Save Order</button>
         <div class="courier-admin-fields">
-          <b style="font-size:12px">Courier Dispatch Details</b>
+          <b class="courier-section-title" style="font-size:12px">🚚 Courier Dispatch Details</b>
           <div class="courier-grid">
             <label>Courier Company<input type="text" maxlength="60" data-courier-company="${esc(o.id)}" value="${esc(o.courierCompany||'')}" placeholder="जैसे India Post / DTDC"></label>
             <label>AWB / Tracking Number<input type="text" maxlength="80" data-courier-awb="${esc(o.id)}" value="${esc(o.trackingNumber||'')}" placeholder="Courier AWB Number"></label>
