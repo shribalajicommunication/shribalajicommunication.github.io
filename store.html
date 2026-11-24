@@ -324,17 +324,17 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
   .product-card .product-actions .btn{font-size:12px;min-height:40px;padding:8px 5px}
 }
 
-/* Header alignment refinement: keep primary actions together and Main Website at the right */
+/* Header alignment refinement: Main Website button appears first on the left of the action row */
 .store-nav{gap:16px}
 .nav-actions{margin-left:auto;justify-content:flex-end;flex-wrap:wrap}
-.main-site-link{order:10;white-space:nowrap}
+.main-site-link{order:-1;white-space:nowrap}
 #openCartTop{white-space:nowrap}
 @media(max-width:620px){
   .store-nav{align-items:center;flex-wrap:wrap}
   .brand{flex:1 1 100%;max-width:100%}
-  .nav-actions{width:100%;margin-left:0;display:flex;justify-content:flex-end;gap:6px}
+  .nav-actions{width:100%;margin-left:0;display:flex;justify-content:flex-start;gap:6px}
   .nav-actions .btn{font-size:11px;padding:8px 10px}
-  .main-site-link{margin-left:auto}
+  .main-site-link{margin-left:0}
 }
 </style>
 
