@@ -248,12 +248,14 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
 
 
 /* Product discount display and customer purchase actions */
-.product-discount-ribbon{position:absolute;z-index:4;right:12px;top:12px;padding:6px 9px;border-radius:999px;background:#dc2626;color:#fff;font-size:10px;font-weight:950;letter-spacing:.2px;box-shadow:0 4px 12px #b91c1c30}
+/* High-visibility discount badge */
+.product-discount-ribbon{position:absolute;z-index:4;right:12px;top:12px;display:inline-flex;align-items:center;justify-content:center;min-width:82px;padding:9px 13px;border:2px solid rgba(255,255,255,.96);border-radius:12px 12px 12px 4px;background:linear-gradient(135deg,#ff6b35 0%,#f02b45 55%,#c91236 100%);color:#fff;font-size:13px;font-weight:1000;letter-spacing:.55px;text-shadow:0 1px 1px rgba(80,0,0,.22);box-shadow:0 7px 17px rgba(225,29,72,.30),0 0 0 3px rgba(255,255,255,.45);transform:rotate(2deg)}
+.product-discount-ribbon:before{content:"✦";font-size:11px;margin-right:5px;color:#fff4ba}
+.product-card:hover .product-discount-ribbon{transform:rotate(0) scale(1.04);box-shadow:0 9px 20px rgba(225,29,72,.36),0 0 0 3px rgba(255,255,255,.55)}
 .product-price-block{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
 .product-price-block .price{font-size:21px;color:#102b55;font-weight:950}
 .product-mrp{font-size:11px;color:#8491a5;text-decoration:line-through;font-weight:650}
 .discount-pill{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:#ecfdf3;color:#07804a;font-size:10px;font-weight:900;white-space:nowrap}
-.product-saving-note{font-size:10px;color:#07804a;font-weight:750;margin-top:-3px}
 .product-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:5px}
 .product-actions .btn{width:100%;min-width:0;margin:0;min-height:39px;padding:8px 6px;font-size:11px;border-radius:10px}
 .product-actions .btn.secondary{border-color:#fed7aa;color:#b45309;background:#fffaf5}
@@ -264,7 +266,7 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
 .cart-line-pricing .cart-off{font-size:9px;color:#07804a;font-weight:850;background:#ecfdf3;border-radius:5px;padding:2px 5px}
 .cart-discount-row{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#07804a;font-weight:850;border-bottom:1px dashed #c9ead8;padding:0 0 7px}
 .order-item-discount{color:#07804a!important;font-weight:850}
-@media(max-width:620px){.product-discount-ribbon{right:7px;top:7px;font-size:8px;padding:4px 6px}.product-price-block .price{font-size:16px}.product-actions{gap:5px}.product-actions .btn{font-size:9px;min-height:35px;padding:7px 4px}}
+@media(max-width:620px){.product-discount-ribbon{right:7px;top:7px;min-width:68px;font-size:11px;padding:7px 9px}.product-discount-ribbon:before{font-size:9px;margin-right:3px}.product-price-block .price{font-size:16px}.product-actions{gap:5px}.product-actions .btn{font-size:9px;min-height:35px;padding:7px 4px}}
 
 </style>
 </head>
@@ -585,7 +587,7 @@ function renderProducts(){
   else if(sort==='stock')list.sort((a,b)=>Number(b.stock)-Number(a.stock));
   $('productCount').textContent=`${list.length} प्रोडक्ट`;
   if(!list.length){$('productGrid').innerHTML=`<div class="empty"><div style="font-size:34px;margin-bottom:8px">🛍️</div><b>${products.length?'इस खोज से कोई प्रोडक्ट नहीं मिला':'स्टोर में प्रोडक्ट जल्द उपलब्ध होंगे'}</b><p style="margin:7px 0 0;font-size:12px">Admin Panel से प्रोडक्ट फोटो, कीमत और स्टॉक जोड़ने पर वे यहाँ दिखाई देंगे।</p></div>`;return;}
-  $('productGrid').innerHTML=list.map(p=>{const stockQty=Number(p.stock)||0;const stockBadge=stockQty<=0?'OUT OF STOCK':stockQty<=5?`ONLY ${stockQty} LEFT`:'IN STOCK';const mrp=productMrp(p),off=productDiscountPercent(p),saving=productSaving(p);return `<article class="product-card"><div class="product-image"><span class="product-image-badge ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockBadge}</span>${off?`<span class="product-discount-ribbon">${off}% OFF</span>`:''}${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}" loading="lazy">`:`<span class="placeholder">${icons[p.category]||'🛍️'}</span>`}<span class="product-image-sheen" aria-hidden="true"></span></div><div class="product-body"><span class="product-category"><span>${icons[p.category]||'✦'}</span> ${esc(p.category)}</span><h3>${esc(p.name)}</h3><div class="product-desc" title="${esc(p.description||'')}">${esc(p.description||'')}</div><div class="product-price-row"><div class="product-price-block"><span class="price">${money(p.price)}</span>${off?`<span class="product-mrp">${money(mrp)}</span><span class="discount-pill">${off}% छूट</span>`:''}</div><span class="stock ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockQty>0?`स्टॉक: ${stockQty}`:'स्टॉक उपलब्ध नहीं'}</span></div>${off?`<div class="product-saving-note">आपकी बचत ${money(saving)} प्रति पीस</div>`:''}<div class="product-actions"><button class="btn secondary" data-add="${esc(p.id)}" ${stockQty<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" data-buy="${esc(p.id)}" ${stockQty<=0?'disabled':''}>Buy Now ⚡</button></div></div></article>`;}).join('');
+  $('productGrid').innerHTML=list.map(p=>{const stockQty=Number(p.stock)||0;const stockBadge=stockQty<=0?'OUT OF STOCK':stockQty<=5?`ONLY ${stockQty} LEFT`:'IN STOCK';const mrp=productMrp(p),off=productDiscountPercent(p);return `<article class="product-card"><div class="product-image"><span class="product-image-badge ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockBadge}</span>${off?`<span class="product-discount-ribbon">${off}% OFF</span>`:''}${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="${esc(p.name)}" loading="lazy">`:`<span class="placeholder">${icons[p.category]||'🛍️'}</span>`}<span class="product-image-sheen" aria-hidden="true"></span></div><div class="product-body"><span class="product-category"><span>${icons[p.category]||'✦'}</span> ${esc(p.category)}</span><h3>${esc(p.name)}</h3><div class="product-desc" title="${esc(p.description||'')}">${esc(p.description||'')}</div><div class="product-price-row"><div class="product-price-block"><span class="price">${money(p.price)}</span>${off?`<span class="product-mrp">${money(mrp)}</span><span class="discount-pill">${off}% छूट</span>`:''}</div><span class="stock ${stockQty<=0?'out':stockQty<=5?'low':''}">${stockQty>0?`स्टॉक: ${stockQty}`:'स्टॉक उपलब्ध नहीं'}</span></div><div class="product-actions"><button class="btn secondary" data-add="${esc(p.id)}" ${stockQty<=0?'disabled':''}>🛒 Add to Cart</button><button class="btn buy-now-btn" data-buy="${esc(p.id)}" ${stockQty<=0?'disabled':''}>Buy Now ⚡</button></div></div></article>`;}).join('');
 }
 function cartTotal(){return cart.reduce((sum,x)=>sum+x.price*x.qty,0);}
 function courierChargeForSubtotal(subtotal){const amount=Number(subtotal)||0;return amount<=1000?40:0;}
