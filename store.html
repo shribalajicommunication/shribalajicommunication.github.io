@@ -177,6 +177,52 @@
 @media(max-width:520px){#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab{width:100%;padding:10px 7px}#storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}#storeAdminArea .order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#storeAdminArea .order-tools{grid-template-columns:1fr}#storeAdminArea .order-tools input{grid-column:auto}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){#storeAdminArea *{transition:none!important}}
 
+/* Order card workspace: use the left-side space for practical order details */
+#storeAdminArea .order-admin-card{grid-template-columns:minmax(0,1.55fr) minmax(310px,1fr);gap:16px}
+#storeAdminArea .order-admin-main{display:grid;align-content:start;gap:11px;min-width:0}
+#storeAdminArea .order-topline{margin:0}
+#storeAdminArea .order-customer-strip{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #dbeafe;border-radius:12px;background:linear-gradient(100deg,#eff6ff,#f8fbff)}
+#storeAdminArea .order-customer-avatar{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:12px;background:#2563eb;color:#fff;font-size:17px;font-weight:900;text-transform:uppercase}
+#storeAdminArea .order-customer-copy{min-width:0;display:grid;gap:3px}
+#storeAdminArea .order-customer-copy b{font-size:13px;color:#1e3a8a}
+#storeAdminArea .order-customer-copy small{font-size:11px;color:#5b6f8c;overflow-wrap:anywhere}
+#storeAdminArea .order-detail-box{min-width:0;border:1px solid #e1e8f2;border-radius:12px;background:#fff;padding:11px 12px}
+#storeAdminArea .order-detail-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+#storeAdminArea .order-detail-title b{font-size:12px;color:#243b5a}
+#storeAdminArea .order-detail-title span{font-size:10px;color:#64748b;font-weight:750;text-align:right}
+#storeAdminArea .order-item-detail-list{display:grid;gap:7px}
+#storeAdminArea .order-item-detail-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border:1px solid #e8eef6;border-radius:10px;background:#fbfdff;min-width:0}
+#storeAdminArea .order-item-thumb{width:48px;height:48px;display:grid;place-items:center;border:1px solid #e2e8f0;border-radius:9px;background:#fff;overflow:hidden;color:#526b89;font-size:22px}
+#storeAdminArea .order-item-thumb img{width:100%;height:100%;object-fit:contain}
+#storeAdminArea .order-item-copy{display:grid;gap:3px;min-width:0}
+#storeAdminArea .order-item-copy b{font-size:12px;line-height:1.35;color:#1e293b;overflow-wrap:anywhere}
+#storeAdminArea .order-item-copy small{font-size:10px;color:#66758b;line-height:1.35}
+#storeAdminArea .order-item-stock.ok{color:#07804a}
+#storeAdminArea .order-item-stock.low{color:#b45309;font-weight:800}
+#storeAdminArea .order-item-stock.out{color:#b42318;font-weight:850}
+#storeAdminArea .order-item-line-total{font-size:12px;color:#174ea6;white-space:nowrap}
+#storeAdminArea .order-item-empty{font-size:11px;color:#64748b;padding:8px}
+#storeAdminArea .order-items-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px dashed #dbe4f0;margin-top:8px;padding-top:8px;font-size:11px;color:#64748b}
+#storeAdminArea .order-items-foot strong{font-size:14px;color:#1d4ed8}
+#storeAdminArea .order-address-detail{background:linear-gradient(120deg,#f0fdfa,#fff);border-color:#b9e8df}
+#storeAdminArea .order-address-detail p{font-size:11px;line-height:1.55;color:#43576f;margin:0 0 9px;overflow-wrap:anywhere}
+#storeAdminArea .order-contact-actions{display:flex;gap:7px;flex-wrap:wrap}
+#storeAdminArea .order-contact-actions a{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:850;text-decoration:none}
+#storeAdminArea .order-contact-call{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+#storeAdminArea .order-contact-actions .order-whatsapp{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+#storeAdminArea .order-progress-box{border:1px solid #e5e7eb;border-radius:12px;padding:10px 11px;background:#fbfcfe}
+#storeAdminArea .order-progress-box.cancelled{display:flex;gap:10px;align-items:center;background:#fff5f5;border-color:#fecaca;color:#b42318;font-size:11px}
+#storeAdminArea .order-progress-box.cancelled span{font-weight:650}
+#storeAdminArea .order-progress-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+#storeAdminArea .order-progress-step{display:grid;justify-items:center;gap:5px;text-align:center;min-width:0;position:relative}
+#storeAdminArea .order-progress-step i{width:23px;height:23px;display:grid;place-items:center;border:1px solid #cbd5e1;border-radius:50%;background:#fff;color:#64748b;font-style:normal;font-size:10px;font-weight:900}
+#storeAdminArea .order-progress-step small{font-size:9px;line-height:1.25;color:#64748b;overflow-wrap:anywhere}
+#storeAdminArea .order-progress-step.done i{background:#dcfce7;border-color:#86efac;color:#15803d}
+#storeAdminArea .order-progress-step.current i{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 0 0 3px #dbeafe}
+#storeAdminArea .order-progress-step.current small{color:#1d4ed8;font-weight:850}
+@media(max-width:760px){#storeAdminArea .order-admin-card{grid-template-columns:1fr}#storeAdminArea .order-admin-main{gap:10px}}
+@media(max-width:430px){#storeAdminArea .order-item-detail-row{grid-template-columns:42px minmax(0,1fr) auto;gap:7px;padding:7px}#storeAdminArea .order-item-thumb{width:42px;height:42px}#storeAdminArea .order-progress-steps{grid-template-columns:repeat(5,minmax(0,1fr))}#storeAdminArea .order-progress-step small{font-size:8px}#storeAdminArea .order-contact-actions a{flex:1}}
+
 </style>
 </head>
 <body>
@@ -533,6 +579,39 @@ function renderOrderStats(){
   const delivered=adminOrders.filter(o=>(o.orderStatus||'')==='डिलीवर').length;
   $('orderStats').innerHTML=[['Total Orders',total],['New Orders',fresh],['Payment Pending',pending],['Dispatched',dispatched],['Delivered',delivered]].map(([label,value])=>`<div class="order-stat-card"><span>${label}</span><strong>${value}</strong></div>`).join('');
 }
+function renderOrderItemsPanel(order){
+  const items=Array.isArray(order.items)?order.items:[];
+  const totalQty=items.reduce((sum,item)=>sum+(Number(item.quantity)||1),0);
+  const rows=items.map(item=>{
+    const qty=Math.max(1,Number(item.quantity)||1);
+    const price=Number(item.price)||0;
+    const lineTotal=price*qty;
+    const product=adminProducts.find(p=>p.id===item.productId);
+    const category=product?.category||'प्रोडक्ट';
+    const stock=product?Number(product.stock):null;
+    const thumb=product?.imageUrl
+      ? `<img src="${esc(product.imageUrl)}" alt="${esc(item.name||'Product')}" loading="lazy">`
+      : `<span>${icons[category]||'📦'}</span>`;
+    const stockText=product?`वर्तमान स्टॉक: ${stock}`:'प्रोडक्ट स्टॉक जानकारी उपलब्ध नहीं';
+    const stockTone=product?(stock<=0?'out':stock<=5?'low':'ok'):'unknown';
+    return `<div class="order-item-detail-row">
+      <div class="order-item-thumb">${thumb}</div>
+      <div class="order-item-copy"><b>${esc(item.name||'Product')}</b><small>${esc(category)} · ${money(price)} × ${qty}</small><small class="order-item-stock ${stockTone}">${esc(stockText)}</small></div>
+      <strong class="order-item-line-total">${money(lineTotal)}</strong>
+    </div>`;
+  }).join('');
+  return `<section class="order-detail-box order-items-detail">
+    <div class="order-detail-title"><b>🛍️ ऑर्डर में शामिल सामान</b><span>${items.length} प्रोडक्ट · ${totalQty} पीस</span></div>
+    <div class="order-item-detail-list">${rows||'<div class="order-item-empty">इस ऑर्डर में प्रोडक्ट की जानकारी उपलब्ध नहीं है।</div>'}</div>
+    <div class="order-items-foot"><span>सामान की कुल राशि</span><strong>${money(Number(order.subtotal??order.total??0))}</strong></div>
+  </section>`;
+}
+function renderOrderProgress(status){
+  const steps=['नया ऑर्डर','ऑर्डर कन्फर्म','पैकिंग','भेज दिया गया','डिलीवर'];
+  if(status==='रद्द')return `<section class="order-progress-box cancelled"><b>⛔ ऑर्डर की स्थिति</b><span>यह ऑर्डर रद्द किया गया है।</span></section>`;
+  const current=Math.max(0,steps.indexOf(status));
+  return `<section class="order-progress-box"><div class="order-detail-title"><b>📍 ऑर्डर प्रोग्रेस</b><span>${esc(orderStatusLabel(status))}</span></div><div class="order-progress-steps">${steps.map((step,index)=>`<div class="order-progress-step ${index<current?'done':index===current?'current':''}"><i>${index<current?'✓':index+1}</i><small>${esc(orderStatusLabel(step))}</small></div>`).join('')}</div></section>`;
+}
 function renderAdminOrders(){
   renderOrderStats();
   renderDashboardStats();
@@ -552,15 +631,20 @@ function renderAdminOrders(){
     const subtotal=Number(o.subtotal??o.total??0);
     const courierCharge=courierChargeForSubtotal(subtotal);
     const totalPayable=Number(o.totalPayable??(subtotal+courierCharge));
+    const phoneDigits=String(o.customerPhone||'').replace(/\D/g,'');
+    const orderDate=o.createdAt?.seconds?new Date(o.createdAt.seconds*1000).toLocaleString('en-IN'):'तिथि उपलब्ध नहीं';
+    const whatsappUrl=`https://wa.me/91${encodeURIComponent(phoneDigits)}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।')}`;
     return `<div class="admin-row order-admin-card" style="align-items:flex-start">
       <div class="order-admin-main">
         <div class="order-topline"><b>${esc(o.orderNumber||o.id)}</b><span class="order-state-pill ${orderTone}">${esc(orderStatusLabel(currentOrderStatus))}</span></div>
-        <small>${esc(o.customerName)} · ${esc(o.customerPhone)}<br>${itemText}<br>सामान की राशि: <b>${money(subtotal)}</b><br>डिलीवरी: <b>Courier Delivery</b><br>पता: ${esc(o.customerAddress||'पता नहीं दिया')}</small>
+        <div class="order-customer-strip"><div class="order-customer-avatar">${esc((o.customerName||'ग्राहक').trim().charAt(0)||'👤')}</div><div class="order-customer-copy"><b>${esc(o.customerName||'ग्राहक')}</b><small>📞 ${esc(o.customerPhone||'मोबाइल उपलब्ध नहीं')} · ${esc(orderDate)}</small></div></div>
+        ${renderOrderItemsPanel(o)}
+        <section class="order-detail-box order-address-detail"><div class="order-detail-title"><b>📍 डिलीवरी पता</b><span>Courier Delivery</span></div><p>${esc(o.customerAddress||'पता नहीं दिया गया')}</p><div class="order-contact-actions"><a class="order-contact-call" href="tel:${esc(phoneDigits)}">☎ कॉल करें</a><a href="${esc(whatsappUrl)}" target="_blank" rel="noopener" class="order-whatsapp">WhatsApp पर संपर्क करें</a></div></section>
         <div class="order-payment-grid">
           <div class="order-info-box method-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
           <div class="order-info-box payment-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
         </div>
-        <a href="https://wa.me/91${encodeURIComponent(o.customerPhone||'')}?text=${encodeURIComponent('नमस्ते '+(o.customerName||'')+' जी, आपके श्रीबालाजी कम्युनिकेशन ऑनलाइन स्टोर के ऑर्डर '+(o.orderNumber||'')+' के संबंध में संपर्क कर रहे हैं।') }" target="_blank" rel="noopener" class="btn secondary order-whatsapp">WhatsApp</a>
+        ${renderOrderProgress(currentOrderStatus)}
       </div>
       <div class="admin-row-actions order-controls">
         <div class="order-amount-panel">
