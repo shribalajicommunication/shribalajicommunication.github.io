@@ -890,7 +890,7 @@ function renderAdminOrders(){
         </div>
         <label class="order-control order-status-control"><span>📦 Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option value="${esc(v)}" ${o.orderStatus===v?'selected':''}>${esc(orderStatusLabel(v))}</option>`).join('')}</select></label>
         <label class="order-control payment-status-control"><span>💳 Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
-        <button class="btn order-save-primary" data-save-order="${esc(o.id)}" type="button">✓ Save Order</button>
+        <button class="btn order-save-primary" data-save-order="${esc(o.id)}" type="button">✓ Save Order</button><button class="btn secondary" data-print-invoice="${esc(o.id)}" type="button">Print Invoice</button>
         <div class="courier-admin-fields">
           <b class="courier-section-title" style="font-size:12px">🚚 Courier Dispatch Details</b>
           <div class="courier-grid">
@@ -1170,7 +1170,16 @@ document.querySelectorAll("[data-order-quick-filter]").forEach(b=>b.addEventList
 $('orderPaymentFilter').addEventListener('change',renderAdminOrders);
 $('orderMethodFilter').addEventListener('change',renderAdminOrders);
 $('exportOrdersCsv').addEventListener('click',exportFilteredOrdersCsv);
+function printStoreInvoice(order){
+  const items=(order.items||[]).map(i=>{const qty=Number(i.quantity)||1,price=Number(i.price)||0;return `<tr><td>${esc(i.name||'Product')}</td><td>${qty}</td><td>₹${price.toFixed(2)}</td><td>₹${(price*qty).toFixed(2)}</td></tr>`;}).join('');
+  const subtotal=Number(order.subtotal??order.total??0),courier=courierChargeForSubtotal(subtotal),total=Number(order.totalPayable??(subtotal+courier));
+  const date=order.createdAt?.seconds?new Date(order.createdAt.seconds*1000).toLocaleString('en-IN'):new Date().toLocaleString('en-IN');
+  const win=window.open('','_blank','width=850,height=900');if(!win){alert('Please allow pop-ups to print the invoice.');return;}
+  win.document.write(`<!DOCTYPE html><html><head><title>Invoice ${esc(order.orderNumber||order.id)}</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222;margin:28px}header{display:flex;justify-content:space-between;border-bottom:2px solid #222;padding-bottom:14px}h1{margin:0;font-size:24px}small{color:#555}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f2f2f2}.totals{margin:20px 0 0 auto;width:300px}.totals div{display:flex;justify-content:space-between;padding:7px;border-bottom:1px solid #ddd}.grand{font-size:18px;font-weight:bold}.details{margin-top:20px;line-height:1.6}.footer{margin-top:40px;text-align:center;font-size:12px;color:#555}@media print{button{display:none}}</style></head><body><header><div><h1>Shri Balaji Communication</h1><small>Online Store Invoice</small><p>Kadwaya Road, Isagarh, Madhya Pradesh<br>Phone: 7089748108</p></div><div><h2>INVOICE</h2><b>${esc(order.orderNumber||order.id)}</b><br><small>${esc(date)}</small></div></header><div class="details"><b>Bill To:</b><br>${esc(order.customerName||'Customer')}<br>${esc(order.customerPhone||'')}<br>${esc(order.customerAddress||'')}</div><table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead><tbody>${items}</tbody></table><div class="totals"><div><span>Subtotal</span><b>₹${subtotal.toFixed(2)}</b></div><div><span>Courier Charge</span><b>${courier===0?'FREE':'₹'+courier.toFixed(2)}</b></div><div class="grand"><span>Total</span><b>₹${total.toFixed(2)}</b></div></div><div class="details"><b>Payment Method:</b> ${order.paymentMethod==='UPI'?'UPI Online':'Cash on Delivery'}<br><b>Payment Status:</b> ${esc(order.paymentStatus||'Payment Pending')}<br><b>Order Status:</b> ${esc(orderStatusLabel(order.orderStatus||'नया ऑर्डर'))}</div><div class="footer">Thank you for shopping with Shri Balaji Communication.</div><button onclick="window.print()">Print Invoice</button></body></html>`);
+  win.document.close();win.focus();setTimeout(()=>win.print(),300);
+}
 $('adminOrders').addEventListener('click',async e=>{
+  const invoiceButton=e.target.closest('[data-print-invoice]');if(invoiceButton){const order=adminOrders.find(x=>x.id===invoiceButton.dataset.printInvoice);if(order)printStoreInvoice(order);return;}
   const courierButton=e.target.closest('[data-save-courier]');
   if(courierButton){
     if(!isStoreManager()){alert('केवल अधिकृत Store Admin Courier Details सेव कर सकता है।');return;}
