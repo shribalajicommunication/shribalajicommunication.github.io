@@ -676,7 +676,7 @@ const ORDER_STATUS_LABELS={
 const orderStatusLabel=status=>ORDER_STATUS_LABELS[status]||status||'New Order';
 const cats=['Computer Accessories','Storage Devices','Printer & Supplies','Networking','Power & UPS','Other Electronics'];
 const icons={'Computer Accessories':'⌨️','Storage Devices':'💾','Printer & Supplies':'🖨️','Networking':'📶','Power & UPS':'🔋','Other Electronics':'🎧'};
-let products=[],cart=JSON.parse(localStorage.getItem('sbc_store_cart_v1')||'[]'),activeCategory='All',editingProductId=null,adminProducts=[],adminOrders=[],adminListenersStarted=false,activeStoreAdminUid=null,stopAdminProducts=null,stopAdminOrders=null;
+let products=[],cart=JSON.parse(localStorage.getItem('sbc_store_cart_v1')||'[]'),activeCategory='All',editingProductId=null,adminProducts=[],adminOrders=[],adminPaymentSubmissions=[],adminListenersStarted=false,activeStoreAdminUid=null,stopAdminProducts=null,stopAdminOrders=null,stopAdminPaymentSubmissions=null;
 const productMap=()=>new Map(products.map(p=>[p.id,p]));
 function saveCart(){localStorage.setItem('sbc_store_cart_v1',JSON.stringify(cart));renderCartCount();}
 function renderCartCount(){const n=cart.reduce((a,x)=>a+x.qty,0);$('cartCountTop').textContent=n;$('cartCountFab').textContent=n;}
@@ -889,6 +889,7 @@ function exportFilteredOrdersCsv(){
 function stopStoreAdminListeners(){
   if(stopAdminProducts){stopAdminProducts();stopAdminProducts=null;}
   if(stopAdminOrders){stopAdminOrders();stopAdminOrders=null;}
+  if(stopAdminPaymentSubmissions){stopAdminPaymentSubmissions();stopAdminPaymentSubmissions=null;}
   adminListenersStarted=false;
   activeStoreAdminUid=null;
   adminProducts=[];
@@ -928,7 +929,7 @@ function startStoreAdmin(user=auth.currentUser){
     console.error('Store orders listener error:',error);
     $('adminOrders').innerHTML=`<div class="notice">ऑर्डर लोड नहीं हुए। Firestore Rules / Login Permission जाँचें। <small>${esc(error.code||error.message||'')}</small></div>`;
   });
-  onSnapshot(paymentSubmissionsRef,snap=>{adminPaymentSubmissions=snap.docs.map(d=>({id:d.id,...d.data()}));renderAdminOrders();},error=>{console.warn('Payment submissions listener:',error);adminPaymentSubmissions=[];});
+  stopAdminPaymentSubmissions=onSnapshot(paymentSubmissionsRef,snap=>{adminPaymentSubmissions=snap.docs.map(d=>({id:d.id,...d.data()}));renderAdminOrders();},error=>{console.warn('Payment submissions listener:',error);adminPaymentSubmissions=[];});
 }
 function maybeShowAdminRoute(){
   if(new URLSearchParams(location.search).get('admin')==='1'){
