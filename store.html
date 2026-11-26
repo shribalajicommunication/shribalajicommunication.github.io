@@ -174,7 +174,7 @@
 #storeAdminArea .admin-form input:focus,#storeAdminArea .admin-form select:focus,#storeAdminArea .admin-form textarea:focus{outline:0;border-color:#8b5cf6;box-shadow:0 0 0 3px #ede9fe}
 #storeAdminArea button:focus-visible,#storeAdminArea a:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
 @media(max-width:760px){#storeAdminArea{padding:14px;border-radius:15px}#storeAdminArea .order-admin-card{grid-template-columns:1fr}#storeAdminArea .order-controls{grid-template-columns:1fr 1fr}#storeAdminArea .order-save-primary,#storeAdminArea .courier-admin-fields{grid-column:1/-1}#storeAdminArea .order-stat-card strong{font-size:23px}}
-@media(max-width:520px){#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab{width:100%;padding:10px 7px}#storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}#storeAdminArea .order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#storeAdminArea .order-tools{grid-template-columns:1fr}#storeAdminArea .order-tools input{grid-column:auto}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab{width:100%;padding:10px 7px}#storeAdminArea .admin-tab:nth-child(3),#storeAdminArea .admin-tab:nth-child(4){grid-column:1/-1}#storeAdminArea .order-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}#storeAdminArea .order-tools{grid-template-columns:1fr}#storeAdminArea .order-tools input{grid-column:auto}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){#storeAdminArea *{transition:none!important}}
 
 /* Order card workspace: use the left-side space for practical order details */
@@ -349,7 +349,7 @@ body.store-admin-mode #storeAdminArea .admin-tab{width:100%;text-align:left;just
 body.store-admin-mode #storeAdminArea .admin-pane{margin-left:240px;min-height:calc(100vh - 130px);padding:18px;background:#fff;border:1px solid #e3e9f2;border-radius:18px;box-shadow:0 5px 24px #20304a0a}
 body.store-admin-mode #storeAdminArea .admin-pane.active{display:block}
 body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
-@media(max-width:760px){body.store-admin-mode #storeAdminArea{padding:12px}body.store-admin-mode #storeAdminArea .admin-tabs{float:none;position:static;width:100%;display:grid;grid-template-columns:1fr 1fr;margin:12px 0}body.store-admin-mode #storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}body.store-admin-mode #storeAdminArea .admin-pane{margin:0;min-height:0;padding:13px}}
+@media(max-width:760px){body.store-admin-mode #storeAdminArea{padding:12px}body.store-admin-mode #storeAdminArea .admin-tabs{float:none;position:static;width:100%;display:grid;grid-template-columns:1fr 1fr;margin:12px 0}body.store-admin-mode #storeAdminArea .admin-tab:nth-child(3),#storeAdminArea .admin-tab:nth-child(4){grid-column:1/-1}body.store-admin-mode #storeAdminArea .admin-pane{margin:0;min-height:0;padding:13px}}
 
 </style>
 
@@ -456,6 +456,7 @@ body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
       <button class="admin-tab active" data-pane="dashboardPane" type="button">Dashboard</button>
       <button class="admin-tab" data-pane="productsPane" type="button">Product Management</button>
       <button class="admin-tab" data-pane="ordersPane" type="button">Customer Orders</button>
+      <button class="admin-tab" data-pane="courierPane" type="button">Courier Management</button>
     </div>
     <section id="dashboardPane" class="admin-pane active">
       <h3 style="margin:8px 0 4px">Store Overview</h3>
@@ -525,6 +526,13 @@ body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
       </div>
       <p id="orderFilterCount" class="checkout-note" aria-live="polite"></p>
       <div id="adminOrders" class="admin-list">ऑर्डर लोड हो रहे हैं…</div>
+    </section>
+    <section id="courierPane" class="admin-pane">
+      <h3>🚚 Courier Management</h3>
+      <p class="checkout-note">Courier dispatch और tracking विवरण का सारांश। किसी ऑर्डर में Courier Details जोड़ने या बदलने के लिए Customer Orders में उसका कार्ड खोलें।</p>
+      <div id="courierAdminSummary" class="order-dashboard-stats" aria-live="polite"></div>
+      <div id="courierAdminList" class="admin-list"></div>
+      <button class="btn" type="button" data-open-pane="ordersPane">Customer Orders में Courier Details Manage करें</button>
     </section>
   </section>
   <section id="adminLoginArea" class="login-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="storeLoginTitle" aria-hidden="true">
@@ -825,9 +833,20 @@ function renderOrderProgress(status){
   const current=Math.max(0,steps.indexOf(status));
   return `<section class="order-progress-box"><div class="order-detail-title"><b>📍 ऑर्डर प्रोग्रेस</b><span>${esc(orderStatusLabel(status))}</span></div><div class="order-progress-steps">${steps.map((step,index)=>`<div class="order-progress-step ${index<current?'done':index===current?'current':''}"><i>${index<current?'✓':index+1}</i><small>${esc(orderStatusLabel(step))}</small></div>`).join('')}</div></section>`;
 }
+function renderCourierManagementSummary(){
+  const box=$('courierAdminSummary'),list=$('courierAdminList');if(!box||!list)return;
+  const shipped=adminOrders.filter(o=>o.orderStatus==='भेज दिया गया'||o.orderStatus==='डिलीवर');
+  const complete=adminOrders.filter(o=>o.courierCompany&&o.trackingNumber&&o.dispatchDate);
+  const pending=adminOrders.filter(o=>!o.courierCompany||!o.trackingNumber||!o.dispatchDate);
+  box.innerHTML=`<div class="order-stat-card"><span>Total Orders</span><strong>${adminOrders.length}</strong></div><div class="order-stat-card"><span>Dispatched / Delivered</span><strong>${shipped.length}</strong></div><div class="order-stat-card"><span>Tracking Details Complete</span><strong>${complete.length}</strong></div><div class="order-stat-card"><span>Details Missing</span><strong>${pending.length}</strong></div>`;
+  const rows=adminOrders.filter(o=>o.orderStatus==='भेज दिया गया'||o.orderStatus==='डिलीवर'||o.courierCompany||o.trackingNumber).slice(0,60);
+  list.innerHTML=rows.length?rows.map(o=>`<div class="admin-row"><div><b>${esc(o.orderNumber||o.id)} — ${esc(o.customerName||'Customer')}</b><small>📞 ${esc(o.customerPhone||'')} · Status: ${esc(orderStatusLabel(o.orderStatus||'नया ऑर्डर'))}<br>Courier: ${esc(o.courierCompany||'Not entered')} · AWB: ${esc(o.trackingNumber||'Not entered')} · Dispatch: ${esc(o.dispatchDate||'Not entered')}</small></div><button class="btn secondary" type="button" data-open-pane="ordersPane">Manage in Orders</button></div>`).join(''):'<div class="empty">अभी Courier / Dispatch वाले ऑर्डर उपलब्ध नहीं हैं। Customer Orders में ऑर्डर का Status भेज दिया गया करें और Courier Details सेव करें।</div>';
+}
+
 function renderAdminOrders(){
   renderOrderStats();
   renderDashboardStats();
+  renderCourierManagementSummary();
   const visible=getFilteredAdminOrders();
   $('orderFilterCount').textContent=`${visible.length} / ${adminOrders.length} ऑर्डर दिखाए जा रहे हैं।`;
   $('adminOrders').innerHTML=visible.length?visible.map(o=>{
@@ -1179,6 +1198,7 @@ $('adminOrders').addEventListener('click',async e=>{
 });
 
 document.querySelectorAll('[data-pane]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.admin-tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.admin-pane').forEach(x=>x.classList.toggle('active',x.id===b.dataset.pane));}));
+$('courierAdminList')?.addEventListener('click',e=>{const b=e.target.closest('[data-open-pane]');if(b){const tab=document.querySelector(`[data-pane=\"${CSS.escape(b.dataset.openPane)}\"]`);if(tab)tab.click();}});
 document.querySelectorAll('[data-product-subpane]').forEach(b=>b.addEventListener('click',()=>setProductSubPane(b.dataset.productSubpane)));
 document.querySelectorAll('[data-open-pane]').forEach(b=>b.addEventListener('click',()=>{
   const pane=b.dataset.openPane;
