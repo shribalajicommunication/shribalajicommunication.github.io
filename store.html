@@ -337,16 +337,19 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
   .main-site-link{margin-left:0}
 }
 
-/* Full-screen Store Admin Workspace */
-body.admin-workspace{overflow:hidden;background:#eef2f8}
-body.admin-workspace .store-top,body.admin-workspace .store-nav,body.admin-workspace .hero,body.admin-workspace .container,body.admin-workspace .footer,body.admin-workspace .cart-fab{display:none!important}
-body.admin-workspace #storeAdminArea{display:block!important;position:fixed!important;inset:0!important;z-index:1000!important;margin:0!important;border:0!important;border-radius:0!important;padding:clamp(12px,2vw,28px)!important;overflow:auto!important;background:linear-gradient(180deg,#f8fbff,#eef3f9)!important;box-shadow:none!important}
-body.admin-workspace #storeAdminArea .admin-tabs{position:sticky;top:0;z-index:15}
-body.admin-workspace #storeAdminArea .admin-list{max-height:calc(100vh - 220px)}
-body.admin-workspace #storeAdminArea .admin-head{position:relative}
-body.admin-workspace #storeAdminArea .admin-head:after{content:'FULL SCREEN WORKSPACE';font-size:10px;font-weight:850;letter-spacing:.8px;color:#64748b;background:#e8eef7;padding:6px 10px;border-radius:999px}
-body.admin-workspace #storeAdminArea .admin-head{gap:12px}
-@media(max-width:760px){body.admin-workspace #storeAdminArea{padding:10px!important}body.admin-workspace #storeAdminArea .admin-list{max-height:none}}
+/* Full-screen Store Manager Workspace */
+body.store-admin-mode{overflow:hidden;background:#eef2f8}
+body.store-admin-mode>.store-nav,body.store-admin-mode>.hero,body.store-admin-mode>.store-benefits,body.store-admin-mode>.footer,body.store-admin-mode>.cart-fab{display:none!important}
+body.store-admin-mode main.container{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;margin:0;padding:0;overflow:auto;background:#f4f7fb;z-index:40}
+body.store-admin-mode main.container>*:not(#storeAdminArea):not(#adminLoginArea){display:none!important}
+body.store-admin-mode #storeAdminArea{display:block!important;position:relative;min-height:100vh;width:100%;margin:0;padding:22px 26px;border:0;border-radius:0;box-shadow:none;background:#f4f7fb;overflow:visible}
+body.store-admin-mode #storeAdminArea .admin-head{position:sticky;top:0;z-index:9;background:#f4f7fb;padding:10px 0 15px}
+body.store-admin-mode #storeAdminArea .admin-tabs{display:flex;flex-direction:column;float:left;width:220px;position:sticky;top:88px;align-self:flex-start;margin:16px 20px 0 0;padding:12px;background:#fff;border-radius:15px;border:1px solid #e2e8f0;box-shadow:0 4px 18px #20304a0a}
+body.store-admin-mode #storeAdminArea .admin-tab{width:100%;text-align:left;justify-content:flex-start;padding:13px 15px}
+body.store-admin-mode #storeAdminArea .admin-pane{margin-left:240px;min-height:calc(100vh - 130px);padding:18px;background:#fff;border:1px solid #e3e9f2;border-radius:18px;box-shadow:0 5px 24px #20304a0a}
+body.store-admin-mode #storeAdminArea .admin-pane.active{display:block}
+body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
+@media(max-width:760px){body.store-admin-mode #storeAdminArea{padding:12px}body.store-admin-mode #storeAdminArea .admin-tabs{float:none;position:static;width:100%;display:grid;grid-template-columns:1fr 1fr;margin:12px 0}body.store-admin-mode #storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}body.store-admin-mode #storeAdminArea .admin-pane{margin:0;min-height:0;padding:13px}}
 
 </style>
 
@@ -378,43 +381,6 @@ body.admin-workspace #storeAdminArea .admin-head{gap:12px}
   .side-trust-card p,.side-support-card p{font-size:11px}
   .side-payment-tags span{font-size:10px}.side-call-link{font-size:13px}.side-track-link{font-size:11px}
 }
-
-/* Store Manager layout: clearer classification and compact responsive panels */
-#storeAdminArea{padding:clamp(14px,2vw,24px);background:#fbfdff;border-radius:20px}
-#storeAdminArea .admin-head{padding-bottom:15px;border-bottom:1px solid #e5edf5}
-#storeAdminArea .admin-head h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.35px}
-#storeAdminArea .admin-tabs{position:static;display:flex;gap:9px;padding:10px;background:#eef4fb;border:1px solid #dbe6f2;border-radius:14px}
-#storeAdminArea .admin-tab{padding:11px 16px;background:#fff;border-color:#d8e3f0;font-size:13px}
-#storeAdminArea .admin-tab.active{background:#2563eb;border-color:#2563eb;box-shadow:0 4px 12px #2563eb24}
-#storeAdminArea .admin-pane>h3{font-size:20px;margin:18px 0 8px}
-#storeAdminArea .store-dash-grid{gap:12px}
-#storeAdminArea .store-dash-card{padding:16px;border-radius:15px;background:linear-gradient(150deg,#fff,#f8fbff);box-shadow:0 3px 12px #18365b08}
-#storeAdminArea .store-dash-card strong{font-size:28px}
-#storeAdminArea .admin-subtabs{padding:8px;background:#f1f5f9;border-radius:13px}
-#storeAdminArea .admin-subtab{padding:10px 14px}
-#storeAdminArea .admin-form{gap:12px}
-#storeAdminArea .admin-form>div:not(.full){padding:10px;background:#f8fbff;border:1px solid #e5edf5;border-radius:12px}
-#storeAdminArea .product-list-toolbar{background:#f8fbff;border:1px solid #e1eaf4;border-radius:13px;padding:12px}
-#storeAdminArea .order-dashboard-stats{gap:11px}
-#storeAdminArea .order-tools{padding:12px;background:#f0f5fb;border:1px solid #dce7f3;border-radius:14px;gap:10px}
-#storeAdminArea .order-tools input,#storeAdminArea .order-tools select{min-height:42px;border-radius:10px}
-#storeAdminArea .order-admin-card{grid-template-columns:minmax(0,1.4fr) minmax(290px,.9fr);gap:14px;padding:14px}
-#storeAdminArea .order-admin-main{gap:12px}
-#storeAdminArea .order-topline{padding:2px 2px 9px;border-bottom:1px solid #e7eef6}
-#storeAdminArea .order-customer-strip{border-radius:13px;background:#f1f6ff;border:1px solid #d9e7ff;padding:12px}
-#storeAdminArea .order-detail-box{padding:13px;border-radius:13px}
-#storeAdminArea .order-items-detail{background:#fbfdff}
-#storeAdminArea .order-address-detail{background:#f7fffc;border-color:#ccefe5}
-#storeAdminArea .order-payment-grid{gap:10px}
-#storeAdminArea .order-info-box{padding:13px;border-radius:12px;min-width:0}
-#storeAdminArea .order-controls{position:static;padding:14px;border-radius:15px;background:#f7faff;gap:12px}
-#storeAdminArea .order-amount-panel{gap:10px;padding:13px;border-radius:13px}
-#storeAdminArea .order-control{padding:12px;border-radius:12px}
-#storeAdminArea .courier-admin-fields{padding:13px;border:1px dashed #c9d8ea;border-radius:13px;background:#fff}
-#storeAdminArea .order-save-primary,#storeAdminArea .courier-save-primary{width:100%;justify-self:stretch}
-#storeAdminArea .order-contact-actions{flex-wrap:wrap}
-@media(max-width:900px){#storeAdminArea .order-admin-card{grid-template-columns:1fr}#storeAdminArea .order-controls{grid-template-columns:1fr 1fr}#storeAdminArea .courier-admin-fields,#storeAdminArea .order-save-primary{grid-column:1/-1}}
-@media(max-width:600px){#storeAdminArea{padding:12px}#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr}#storeAdminArea .order-tools{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -891,7 +857,7 @@ function renderAdminOrders(){
           <div class="order-info-box method-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
           <div class="order-info-box payment-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
         </div>
-        ${isUpi&&adminPaymentSubmissions.find(p=>p.orderDocId===o.id)?(()=>{const p=adminPaymentSubmissions.find(x=>x.orderDocId===o.id);const verified=o.paymentStatus==='भुगतान प्राप्त'||p.status==='Verified';const verifiedAt=p.verifiedAt||o.paymentVerifiedAt;const verifiedBy=p.verifiedBy||o.paymentVerifiedBy;const adminLabel=verifiedBy==='NZAAy9G9QCfHlwsuVhYTqkUwil62'?'Primary Admin':verifiedBy==='rNNvLoiQL3VthmtwYa5jV8Po5AU2'?'Store Admin':verifiedBy?'Admin':'—';return `<section class="order-detail-box" style="margin-top:10px;border:1px solid ${verified?'#86efac':'#dbeafe'};background:${verified?'#f0fdf4':'#eff6ff'}"><b>🧾 Customer UTR Submission</b><p>UTR: <strong>${esc(p.utr||o.verifiedUtr||'')}</strong><br><small>Submitted: ${esc(p.submittedAt?.seconds?new Date(p.submittedAt.seconds*1000).toLocaleString('en-IN'):'—')}</small><br>Status: <strong style="color:${verified?'#15803d':'#b45309'}">${verified?'✓ VERIFIED':'Pending Admin Verification'}</strong></p>${verified?`<div style="font-size:12px;line-height:1.7;margin-top:6px;padding-top:7px;border-top:1px solid #bbf7d0"><b>✓ Payment Verified</b><br>Verification Date: ${esc(verifiedAt?.seconds?new Date(verifiedAt.seconds*1000).toLocaleString('en-IN'):'Date unavailable')}<br>Verified By: ${esc(adminLabel)}</div>`:`<button class="btn" type="button" data-verify-utr="${esc(o.id)}" data-payment-submission-id="${esc(p.id)}">✓ UTR जाँचकर Payment Verify करें</button>`}</section>`;})():o.paymentStatus==='भुगतान प्राप्त'&&o.verifiedUtr?`<section class="order-detail-box" style="margin-top:10px;border:1px solid #86efac;background:#f0fdf4"><b>✓ VERIFIED PAYMENT</b><p>Verified UTR: <strong>${esc(o.verifiedUtr)}</strong></p><small>Verification Date: ${esc(o.paymentVerifiedAt?.seconds?new Date(o.paymentVerifiedAt.seconds*1000).toLocaleString('en-IN'):'Date unavailable')}<br>Verified By: ${esc(o.paymentVerifiedBy==='NZAAy9G9QCfHlwsuVhYTqkUwil62'?'Primary Admin':o.paymentVerifiedBy==='rNNvLoiQL3VthmtwYa5jV8Po5AU2'?'Store Admin':'Admin')}</small></section>`:''}
+        ${isUpi&&adminPaymentSubmissions.find(p=>p.orderDocId===o.id)?(()=>{const p=adminPaymentSubmissions.find(x=>x.orderDocId===o.id);return `<section class="order-detail-box" style="margin-top:10px"><b>🧾 Customer UTR Submission</b><p>UTR: <strong>${esc(p.utr||'')}</strong><br><small>${esc(p.submittedAt?.seconds?new Date(p.submittedAt.seconds*1000).toLocaleString('en-IN'):'')}</small><br>Status: ${esc(p.status||'Pending Admin Verification')}</p>${o.paymentStatus!=='भुगतान प्राप्त'?`<button class="btn" type="button" data-verify-utr="${esc(o.id)}" data-payment-submission-id="${esc(p.id)}">✓ UTR जाँचकर Payment Verify करें</button>`:''}</section>`;})():''}
         ${renderOrderProgress(currentOrderStatus)}
       </div>
       <div class="admin-row-actions order-controls">
@@ -951,7 +917,7 @@ function startStoreAdmin(user=auth.currentUser){
   $('adminLoginArea').classList.remove('show');
   $('adminLoginArea').setAttribute('aria-hidden','true');
   $('storeAdminArea').classList.add('show');
-  document.body.classList.add('admin-workspace');
+  document.body.classList.add('store-admin-mode');
   $('adminIdentity').textContent=(user.email||'Authorized Admin')+(user.uid===STORE_ADMIN_UID?' · Store Manager':' · Main Admin');
 
   // Firebase Auth is shared by the Main Website and Online Store. If the
@@ -1147,14 +1113,14 @@ onAuthStateChanged(auth,user=>{
   }else{
     stopStoreAdminListeners();
     $('storeAdminArea').classList.remove('show');
-    document.body.classList.remove('admin-workspace');
+    document.body.classList.remove('store-admin-mode');
     if(new URLSearchParams(location.search).get('admin')==='1'){
       $('adminLoginArea').classList.add('show');
       $('adminLoginArea').setAttribute('aria-hidden','false');
     }
   }
 });
-$('adminSignOut').addEventListener('click',async()=>{stopStoreAdminListeners();await signOut(auth);$('storeAdminArea').classList.remove('show');document.body.classList.remove('admin-workspace');$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');});
+$('adminSignOut').addEventListener('click',async()=>{stopStoreAdminListeners();await signOut(auth);$('storeAdminArea').classList.remove('show');document.body.classList.remove('store-admin-mode');$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');});
 $('productForm').addEventListener('submit',async e=>{e.preventDefault();if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट सेव कर सकता है।');return;}const button=$('saveProduct');button.disabled=true;button.textContent='सेव हो रहा है…';try{const old=adminProducts.find(p=>p.id===editingProductId);const file=$('pImage').files[0];const imageUrl=file?await uploadStoreImage(file):(old?.imageUrl||'');const data={name:$('pName').value.trim(),category:$('pCategory').value,description:$('pDescription').value.trim(),price:Number($('pPrice').value),mrp:Number($('pMrp').value)||Number($('pPrice').value),stock:Number($('pStock').value),imageUrl,active:$('pActive').checked,updatedAt:serverTimestamp()};if(!data.name||!data.category||!Number.isFinite(data.price)||data.price<=0||!Number.isFinite(data.mrp)||data.mrp<data.price||!Number.isInteger(data.stock)||data.stock<0)throw new Error('प्रोडक्ट की जानकारी जाँचें। MRP खाली छोड़ सकते हैं या Selling Price से अधिक रखें।');if(editingProductId)await updateDoc(doc(db,'storeProducts',editingProductId),data);else await addDoc(productsRef,{...data,createdAt:serverTimestamp()});resetProductForm();}catch(error){console.error(error);alert('प्रोडक्ट सेव नहीं हुआ: '+(error.message||error.code||''));}finally{button.disabled=false;button.textContent=editingProductId?'बदलाव सेव करें':'प्रोडक्ट सेव करें';}});
 $('cancelProductEdit').addEventListener('click',resetProductForm);
 $('adminProducts').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-product]')?.dataset.editProduct,toggle=e.target.closest('[data-toggle-product]')?.dataset.toggleProduct,del=e.target.closest('[data-delete-product]')?.dataset.deleteProduct;if(edit||toggle||del){if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट मैनेज कर सकता है।');return;}}if(edit){const p=adminProducts.find(x=>x.id===edit);if(!p)return;document.querySelector('[data-pane="productsPane"]')?.click();setProductSubPane('productFormPane');editingProductId=edit;$('pName').value=p.name||'';$('pCategory').value=p.category||'';$('pPrice').value=p.price||'';$('pMrp').value=p.mrp&&Number(p.mrp)>Number(p.price)?p.mrp:'';$('pStock').value=p.stock??0;$('pDescription').value=p.description||'';$('pActive').checked=!!p.active;$('saveProduct').textContent='बदलाव सेव करें';$('cancelProductEdit').classList.remove('hidden');$('pImageInfo').textContent='नई फोटो चुनें तो पुरानी फोटो बदल जाएगी।';$('productForm').scrollIntoView({behavior:'smooth',block:'start'});} else if(toggle){const p=adminProducts.find(x=>x.id===toggle);if(p)await updateDoc(doc(db,'storeProducts',toggle),{active:!p.active,updatedAt:serverTimestamp()});}else if(del&&confirm('क्या आप यह प्रोडक्ट हटाना चाहते हैं?')){await deleteDoc(doc(db,'storeProducts',del));}});
