@@ -336,6 +336,18 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
   .nav-actions .btn{font-size:11px;padding:8px 10px}
   .main-site-link{margin-left:0}
 }
+
+/* Full-screen Store Admin Workspace */
+body.admin-workspace{overflow:hidden;background:#eef2f8}
+body.admin-workspace .store-top,body.admin-workspace .store-nav,body.admin-workspace .hero,body.admin-workspace .container,body.admin-workspace .footer,body.admin-workspace .cart-fab{display:none!important}
+body.admin-workspace #storeAdminArea{display:block!important;position:fixed!important;inset:0!important;z-index:1000!important;margin:0!important;border:0!important;border-radius:0!important;padding:clamp(12px,2vw,28px)!important;overflow:auto!important;background:linear-gradient(180deg,#f8fbff,#eef3f9)!important;box-shadow:none!important}
+body.admin-workspace #storeAdminArea .admin-tabs{position:sticky;top:0;z-index:15}
+body.admin-workspace #storeAdminArea .admin-list{max-height:calc(100vh - 220px)}
+body.admin-workspace #storeAdminArea .admin-head{position:relative}
+body.admin-workspace #storeAdminArea .admin-head:after{content:'FULL SCREEN WORKSPACE';font-size:10px;font-weight:850;letter-spacing:.8px;color:#64748b;background:#e8eef7;padding:6px 10px;border-radius:999px}
+body.admin-workspace #storeAdminArea .admin-head{gap:12px}
+@media(max-width:760px){body.admin-workspace #storeAdminArea{padding:10px!important}body.admin-workspace #storeAdminArea .admin-list{max-height:none}}
+
 </style>
 
 <style id="balanced-store-typography-tune">
@@ -939,6 +951,7 @@ function startStoreAdmin(user=auth.currentUser){
   $('adminLoginArea').classList.remove('show');
   $('adminLoginArea').setAttribute('aria-hidden','true');
   $('storeAdminArea').classList.add('show');
+  document.body.classList.add('admin-workspace');
   $('adminIdentity').textContent=(user.email||'Authorized Admin')+(user.uid===STORE_ADMIN_UID?' · Store Manager':' · Main Admin');
 
   // Firebase Auth is shared by the Main Website and Online Store. If the
@@ -1134,13 +1147,14 @@ onAuthStateChanged(auth,user=>{
   }else{
     stopStoreAdminListeners();
     $('storeAdminArea').classList.remove('show');
+    document.body.classList.remove('admin-workspace');
     if(new URLSearchParams(location.search).get('admin')==='1'){
       $('adminLoginArea').classList.add('show');
       $('adminLoginArea').setAttribute('aria-hidden','false');
     }
   }
 });
-$('adminSignOut').addEventListener('click',async()=>{stopStoreAdminListeners();await signOut(auth);$('storeAdminArea').classList.remove('show');$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');});
+$('adminSignOut').addEventListener('click',async()=>{stopStoreAdminListeners();await signOut(auth);$('storeAdminArea').classList.remove('show');document.body.classList.remove('admin-workspace');$('adminLoginArea').classList.add('show');$('adminLoginArea').setAttribute('aria-hidden','false');});
 $('productForm').addEventListener('submit',async e=>{e.preventDefault();if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट सेव कर सकता है।');return;}const button=$('saveProduct');button.disabled=true;button.textContent='सेव हो रहा है…';try{const old=adminProducts.find(p=>p.id===editingProductId);const file=$('pImage').files[0];const imageUrl=file?await uploadStoreImage(file):(old?.imageUrl||'');const data={name:$('pName').value.trim(),category:$('pCategory').value,description:$('pDescription').value.trim(),price:Number($('pPrice').value),mrp:Number($('pMrp').value)||Number($('pPrice').value),stock:Number($('pStock').value),imageUrl,active:$('pActive').checked,updatedAt:serverTimestamp()};if(!data.name||!data.category||!Number.isFinite(data.price)||data.price<=0||!Number.isFinite(data.mrp)||data.mrp<data.price||!Number.isInteger(data.stock)||data.stock<0)throw new Error('प्रोडक्ट की जानकारी जाँचें। MRP खाली छोड़ सकते हैं या Selling Price से अधिक रखें।');if(editingProductId)await updateDoc(doc(db,'storeProducts',editingProductId),data);else await addDoc(productsRef,{...data,createdAt:serverTimestamp()});resetProductForm();}catch(error){console.error(error);alert('प्रोडक्ट सेव नहीं हुआ: '+(error.message||error.code||''));}finally{button.disabled=false;button.textContent=editingProductId?'बदलाव सेव करें':'प्रोडक्ट सेव करें';}});
 $('cancelProductEdit').addEventListener('click',resetProductForm);
 $('adminProducts').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-product]')?.dataset.editProduct,toggle=e.target.closest('[data-toggle-product]')?.dataset.toggleProduct,del=e.target.closest('[data-delete-product]')?.dataset.deleteProduct;if(edit||toggle||del){if(!isStoreManager()){alert('केवल अधिकृत Store Admin प्रोडक्ट मैनेज कर सकता है।');return;}}if(edit){const p=adminProducts.find(x=>x.id===edit);if(!p)return;document.querySelector('[data-pane="productsPane"]')?.click();setProductSubPane('productFormPane');editingProductId=edit;$('pName').value=p.name||'';$('pCategory').value=p.category||'';$('pPrice').value=p.price||'';$('pMrp').value=p.mrp&&Number(p.mrp)>Number(p.price)?p.mrp:'';$('pStock').value=p.stock??0;$('pDescription').value=p.description||'';$('pActive').checked=!!p.active;$('saveProduct').textContent='बदलाव सेव करें';$('cancelProductEdit').classList.remove('hidden');$('pImageInfo').textContent='नई फोटो चुनें तो पुरानी फोटो बदल जाएगी।';$('productForm').scrollIntoView({behavior:'smooth',block:'start'});} else if(toggle){const p=adminProducts.find(x=>x.id===toggle);if(p)await updateDoc(doc(db,'storeProducts',toggle),{active:!p.active,updatedAt:serverTimestamp()});}else if(del&&confirm('क्या आप यह प्रोडक्ट हटाना चाहते हैं?')){await deleteDoc(doc(db,'storeProducts',del));}});
