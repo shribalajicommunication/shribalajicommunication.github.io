@@ -351,6 +351,8 @@ body.store-admin-mode #storeAdminArea .admin-pane.active{display:block}
 body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
 @media(max-width:760px){body.store-admin-mode #storeAdminArea{padding:12px}body.store-admin-mode #storeAdminArea .admin-tabs{float:none;position:static;width:100%;display:grid;grid-template-columns:1fr 1fr;margin:12px 0}body.store-admin-mode #storeAdminArea .admin-tab:nth-child(3),#storeAdminArea .admin-tab:nth-child(4){grid-column:1/-1}body.store-admin-mode #storeAdminArea .admin-pane{margin:0;min-height:0;padding:13px}}
 
+
+.order-quick-filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}.order-quick-filters .btn{padding:8px 11px;font-size:12px}
 </style>
 
 <style id="balanced-store-typography-tune">
@@ -511,6 +513,7 @@ body.store-admin-mode #storeAdminArea:after{content:'';display:block;clear:both}
       <h3>ग्राहक ऑर्डर</h3>
       <p class="checkout-note">सभी ऑर्डर यहाँ देखें, खोजें और स्थिति के अनुसार फ़िल्टर करें। ऑर्डर को कन्फर्म / पैकिंग / डिस्पैच करने पर स्टॉक अपने आप घटेगा; वापस नया या रद्द करने पर स्टॉक लौटेगा। UPI भुगतान की पुष्टि बैंक/UPI ऐप में देखकर ही करें।</p>
       <div id="orderStats" class="order-dashboard-stats" aria-live="polite"></div>
+      <div class="order-quick-filters" aria-label="Quick order filters"><button type="button" class="btn secondary" data-order-quick-filter="ALL">सभी ऑर्डर</button><button type="button" class="btn secondary" data-order-quick-filter="नया ऑर्डर">नए</button><button type="button" class="btn secondary" data-order-quick-filter="ऑर्डर कन्फर्म">कन्फर्म</button><button type="button" class="btn secondary" data-order-quick-filter="पैकिंग">Packing</button><button type="button" class="btn secondary" data-order-quick-filter="भेज दिया गया">Dispatched</button><button type="button" class="btn secondary" data-order-quick-filter="डिलीवर">Delivered</button><button type="button" class="btn secondary" data-order-quick-filter="रद्द">Cancelled</button></div>
       <div class="order-tools">
         <input id="orderSearch" type="search" placeholder="Order Number, ग्राहक, मोबाइल या प्रोडक्ट खोजें…" aria-label="ऑर्डर खोजें">
         <select id="orderStatusFilter" aria-label="ऑर्डर स्थिति फ़िल्टर">
@@ -1163,6 +1166,7 @@ $('adminOrders').addEventListener('click',async e=>{
 
 $('orderSearch').addEventListener('input',renderAdminOrders);
 $('orderStatusFilter').addEventListener('change',renderAdminOrders);
+document.querySelectorAll("[data-order-quick-filter]").forEach(b=>b.addEventListener("click",()=>{$("orderStatusFilter").value=b.dataset.orderQuickFilter;renderAdminOrders();}));
 $('orderPaymentFilter').addEventListener('change',renderAdminOrders);
 $('orderMethodFilter').addEventListener('change',renderAdminOrders);
 $('exportOrdersCsv').addEventListener('click',exportFilteredOrdersCsv);
