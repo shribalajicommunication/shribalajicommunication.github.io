@@ -27,7 +27,7 @@
 .order-controls{min-width:220px;align-content:start;display:grid;grid-template-columns:1fr;gap:8px}
 .order-control{display:block;min-width:0}
 .order-control select{width:100%;max-width:100%;background:#fff}
-.order-controls>.btn{justify-self:start;padding:7px 14px;font-size:12px}
+.order-controls>.btn{justify-self:start;padding:7px 14px;font-size:12px} .print-invoice-btn{background:#175cd3!important;color:#fff!important;border:1px solid #175cd3!important;display:inline-flex!important;visibility:visible!important;opacity:1!important;min-height:42px}
 @media(max-width:760px){.order-admin-card{grid-template-columns:1fr}.order-controls{min-width:0;grid-template-columns:1fr 1fr}.order-controls>.btn{grid-column:1/-1}}
 @media(max-width:430px){.order-payment-grid{grid-template-columns:1fr}.order-controls{grid-template-columns:1fr}}
 /* Customer Track Order popup */
@@ -890,7 +890,7 @@ function renderAdminOrders(){
         </div>
         <label class="order-control order-status-control"><span>📦 Order Status</span><select data-order-status="${esc(o.id)}">${orderStatusOptions.map(v=>`<option value="${esc(v)}" ${o.orderStatus===v?'selected':''}>${esc(orderStatusLabel(v))}</option>`).join('')}</select></label>
         <label class="order-control payment-status-control"><span>💳 Payment Status</span><select data-payment-status="${esc(o.id)}"><option value="भुगतान पुष्टि बाकी" ${o.paymentStatus!=='भुगतान प्राप्त'?'selected':''}>${pendingLabel}</option><option value="भुगतान प्राप्त" ${o.paymentStatus==='भुगतान प्राप्त'?'selected':''}>${receivedLabel}</option></select></label>
-        <button class="btn order-save-primary" data-save-order="${esc(o.id)}" type="button">✓ Save Order</button><button class="btn secondary" data-print-invoice="${esc(o.id)}" type="button">Print Invoice</button>
+        <button class="btn order-save-primary" data-save-order="${esc(o.id)}" type="button">✓ Save Order</button><button class="btn print-invoice-btn" data-print-invoice="${esc(o.id)}" type="button">🖨 Print Invoice</button>
         <div class="courier-admin-fields">
           <b class="courier-section-title" style="font-size:12px">🚚 Courier Dispatch Details</b>
           <div class="courier-grid">
@@ -1178,8 +1178,9 @@ function printStoreInvoice(order){
   win.document.write(`<!DOCTYPE html><html><head><title>Invoice ${esc(order.orderNumber||order.id)}</title><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222;margin:28px}header{display:flex;justify-content:space-between;border-bottom:2px solid #222;padding-bottom:14px;align-items:center}.shop-brand{display:flex;align-items:center;gap:14px}.shop-logo{width:90px;height:90px;object-fit:contain}h1{margin:0;font-size:24px}small{color:#555}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{padding:10px;border:1px solid #ddd;text-align:left}th{background:#f2f2f2}.totals{margin:20px 0 0 auto;width:300px}.totals div{display:flex;justify-content:space-between;padding:7px;border-bottom:1px solid #ddd}.grand{font-size:18px;font-weight:bold}.details{margin-top:20px;line-height:1.6}.footer{margin-top:40px;text-align:center;font-size:12px;color:#555}@media print{button{display:none}}</style></head><body><header><div class="shop-brand"><img class="shop-logo" src="shri-balaji-logo-website.png" alt="Shri Balaji Communication Logo"><div><h1>Shri Balaji Communication</h1><small>Online Store Invoice</small><p>Kadwaya Road, Isagarh, Madhya Pradesh<br>Phone: 7089748108</p></div></div><div><h2>INVOICE</h2><b>${esc(order.orderNumber||order.id)}</b><br><small>${esc(date)}</small></div></header><div class="details"><b>Bill To:</b><br>${esc(order.customerName||'Customer')}<br>${esc(order.customerPhone||'')}<br>${esc(order.customerAddress||'')}</div><table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead><tbody>${items}</tbody></table><div class="totals"><div><span>Subtotal</span><b>₹${subtotal.toFixed(2)}</b></div><div><span>Courier Charge</span><b>${courier===0?'FREE':'₹'+courier.toFixed(2)}</b></div><div class="grand"><span>Total</span><b>₹${total.toFixed(2)}</b></div></div><div class="details"><b>Payment Method:</b> ${order.paymentMethod==='UPI'?'UPI Online':'Cash on Delivery'}<br><b>Payment Status:</b> ${esc(order.paymentStatus||'Payment Pending')}<br><b>Order Status:</b> ${esc(orderStatusLabel(order.orderStatus||'नया ऑर्डर'))}</div><div class="footer">Thank you for shopping with Shri Balaji Communication.</div><button onclick="window.print()">Print Invoice</button></body></html>`);
   win.document.close();win.focus();setTimeout(()=>win.print(),300);
 }
+document.addEventListener('click',e=>{const invoiceButton=e.target.closest('[data-print-invoice]');if(invoiceButton){e.preventDefault();e.stopPropagation();const order=adminOrders.find(x=>x.id===invoiceButton.dataset.printInvoice);if(order)printStoreInvoice(order);}},true);
 $('adminOrders').addEventListener('click',async e=>{
-  const invoiceButton=e.target.closest('[data-print-invoice]');if(invoiceButton){const order=adminOrders.find(x=>x.id===invoiceButton.dataset.printInvoice);if(order)printStoreInvoice(order);return;}
+  const invoiceButton=e.target.closest('[data-print-invoice]');if(invoiceButton){e.preventDefault();e.stopPropagation();const order=adminOrders.find(x=>x.id===invoiceButton.dataset.printInvoice);if(order)printStoreInvoice(order);return;}
   const courierButton=e.target.closest('[data-save-courier]');
   if(courierButton){
     if(!isStoreManager()){alert('केवल अधिकृत Store Admin Courier Details सेव कर सकता है।');return;}
