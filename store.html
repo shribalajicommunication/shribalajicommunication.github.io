@@ -366,6 +366,43 @@ body{background:#f5f7fb;color:var(--ink);background-image:radial-gradient(circle
   .side-trust-card p,.side-support-card p{font-size:11px}
   .side-payment-tags span{font-size:10px}.side-call-link{font-size:13px}.side-track-link{font-size:11px}
 }
+
+/* Store Manager layout: clearer classification and compact responsive panels */
+#storeAdminArea{padding:clamp(14px,2vw,24px);background:#fbfdff;border-radius:20px}
+#storeAdminArea .admin-head{padding-bottom:15px;border-bottom:1px solid #e5edf5}
+#storeAdminArea .admin-head h2{font-size:clamp(22px,2.3vw,30px);letter-spacing:-.35px}
+#storeAdminArea .admin-tabs{position:static;display:flex;gap:9px;padding:10px;background:#eef4fb;border:1px solid #dbe6f2;border-radius:14px}
+#storeAdminArea .admin-tab{padding:11px 16px;background:#fff;border-color:#d8e3f0;font-size:13px}
+#storeAdminArea .admin-tab.active{background:#2563eb;border-color:#2563eb;box-shadow:0 4px 12px #2563eb24}
+#storeAdminArea .admin-pane>h3{font-size:20px;margin:18px 0 8px}
+#storeAdminArea .store-dash-grid{gap:12px}
+#storeAdminArea .store-dash-card{padding:16px;border-radius:15px;background:linear-gradient(150deg,#fff,#f8fbff);box-shadow:0 3px 12px #18365b08}
+#storeAdminArea .store-dash-card strong{font-size:28px}
+#storeAdminArea .admin-subtabs{padding:8px;background:#f1f5f9;border-radius:13px}
+#storeAdminArea .admin-subtab{padding:10px 14px}
+#storeAdminArea .admin-form{gap:12px}
+#storeAdminArea .admin-form>div:not(.full){padding:10px;background:#f8fbff;border:1px solid #e5edf5;border-radius:12px}
+#storeAdminArea .product-list-toolbar{background:#f8fbff;border:1px solid #e1eaf4;border-radius:13px;padding:12px}
+#storeAdminArea .order-dashboard-stats{gap:11px}
+#storeAdminArea .order-tools{padding:12px;background:#f0f5fb;border:1px solid #dce7f3;border-radius:14px;gap:10px}
+#storeAdminArea .order-tools input,#storeAdminArea .order-tools select{min-height:42px;border-radius:10px}
+#storeAdminArea .order-admin-card{grid-template-columns:minmax(0,1.4fr) minmax(290px,.9fr);gap:14px;padding:14px}
+#storeAdminArea .order-admin-main{gap:12px}
+#storeAdminArea .order-topline{padding:2px 2px 9px;border-bottom:1px solid #e7eef6}
+#storeAdminArea .order-customer-strip{border-radius:13px;background:#f1f6ff;border:1px solid #d9e7ff;padding:12px}
+#storeAdminArea .order-detail-box{padding:13px;border-radius:13px}
+#storeAdminArea .order-items-detail{background:#fbfdff}
+#storeAdminArea .order-address-detail{background:#f7fffc;border-color:#ccefe5}
+#storeAdminArea .order-payment-grid{gap:10px}
+#storeAdminArea .order-info-box{padding:13px;border-radius:12px;min-width:0}
+#storeAdminArea .order-controls{position:static;padding:14px;border-radius:15px;background:#f7faff;gap:12px}
+#storeAdminArea .order-amount-panel{gap:10px;padding:13px;border-radius:13px}
+#storeAdminArea .order-control{padding:12px;border-radius:12px}
+#storeAdminArea .courier-admin-fields{padding:13px;border:1px dashed #c9d8ea;border-radius:13px;background:#fff}
+#storeAdminArea .order-save-primary,#storeAdminArea .courier-save-primary{width:100%;justify-self:stretch}
+#storeAdminArea .order-contact-actions{flex-wrap:wrap}
+@media(max-width:900px){#storeAdminArea .order-admin-card{grid-template-columns:1fr}#storeAdminArea .order-controls{grid-template-columns:1fr 1fr}#storeAdminArea .courier-admin-fields,#storeAdminArea .order-save-primary{grid-column:1/-1}}
+@media(max-width:600px){#storeAdminArea{padding:12px}#storeAdminArea .admin-tabs{display:grid;grid-template-columns:1fr 1fr}#storeAdminArea .admin-tab:nth-child(3){grid-column:1/-1}#storeAdminArea .order-controls{grid-template-columns:1fr}#storeAdminArea .order-payment-grid{grid-template-columns:1fr}#storeAdminArea .order-tools{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -842,7 +879,7 @@ function renderAdminOrders(){
           <div class="order-info-box method-box"><span>Payment Method</span><strong>${methodLabel}</strong></div>
           <div class="order-info-box payment-box"><span>Payment Status</span><strong class="payment-state ${paymentTone}">${paymentLabel}</strong></div>
         </div>
-        ${isUpi&&adminPaymentSubmissions.find(p=>p.orderDocId===o.id)?(()=>{const p=adminPaymentSubmissions.find(x=>x.orderDocId===o.id);return `<section class="order-detail-box" style="margin-top:10px"><b>🧾 Customer UTR Submission</b><p>UTR: <strong>${esc(p.utr||'')}</strong><br><small>${esc(p.submittedAt?.seconds?new Date(p.submittedAt.seconds*1000).toLocaleString('en-IN'):'')}</small><br>Status: ${esc(p.status||'Pending Admin Verification')}</p>${o.paymentStatus!=='भुगतान प्राप्त'?`<button class="btn" type="button" data-verify-utr="${esc(o.id)}" data-payment-submission-id="${esc(p.id)}">✓ UTR जाँचकर Payment Verify करें</button>`:''}</section>`;})():''}
+        ${isUpi&&adminPaymentSubmissions.find(p=>p.orderDocId===o.id)?(()=>{const p=adminPaymentSubmissions.find(x=>x.orderDocId===o.id);const verified=o.paymentStatus==='भुगतान प्राप्त'||p.status==='Verified';const verifiedAt=p.verifiedAt||o.paymentVerifiedAt;const verifiedBy=p.verifiedBy||o.paymentVerifiedBy;const adminLabel=verifiedBy==='NZAAy9G9QCfHlwsuVhYTqkUwil62'?'Primary Admin':verifiedBy==='rNNvLoiQL3VthmtwYa5jV8Po5AU2'?'Store Admin':verifiedBy?'Admin':'—';return `<section class="order-detail-box" style="margin-top:10px;border:1px solid ${verified?'#86efac':'#dbeafe'};background:${verified?'#f0fdf4':'#eff6ff'}"><b>🧾 Customer UTR Submission</b><p>UTR: <strong>${esc(p.utr||o.verifiedUtr||'')}</strong><br><small>Submitted: ${esc(p.submittedAt?.seconds?new Date(p.submittedAt.seconds*1000).toLocaleString('en-IN'):'—')}</small><br>Status: <strong style="color:${verified?'#15803d':'#b45309'}">${verified?'✓ VERIFIED':'Pending Admin Verification'}</strong></p>${verified?`<div style="font-size:12px;line-height:1.7;margin-top:6px;padding-top:7px;border-top:1px solid #bbf7d0"><b>✓ Payment Verified</b><br>Verification Date: ${esc(verifiedAt?.seconds?new Date(verifiedAt.seconds*1000).toLocaleString('en-IN'):'Date unavailable')}<br>Verified By: ${esc(adminLabel)}</div>`:`<button class="btn" type="button" data-verify-utr="${esc(o.id)}" data-payment-submission-id="${esc(p.id)}">✓ UTR जाँचकर Payment Verify करें</button>`}</section>`;})():o.paymentStatus==='भुगतान प्राप्त'&&o.verifiedUtr?`<section class="order-detail-box" style="margin-top:10px;border:1px solid #86efac;background:#f0fdf4"><b>✓ VERIFIED PAYMENT</b><p>Verified UTR: <strong>${esc(o.verifiedUtr)}</strong></p><small>Verification Date: ${esc(o.paymentVerifiedAt?.seconds?new Date(o.paymentVerifiedAt.seconds*1000).toLocaleString('en-IN'):'Date unavailable')}<br>Verified By: ${esc(o.paymentVerifiedBy==='NZAAy9G9QCfHlwsuVhYTqkUwil62'?'Primary Admin':o.paymentVerifiedBy==='rNNvLoiQL3VthmtwYa5jV8Po5AU2'?'Store Admin':'Admin')}</small></section>`:''}
         ${renderOrderProgress(currentOrderStatus)}
       </div>
       <div class="admin-row-actions order-controls">
